@@ -2,17 +2,6 @@
 # http://tkinter.unpythonic.net/wiki/tkFileDialog
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
 
-# TODO
-#  - Change the default FPS to a better value.
-#  - Mac
-#     - Add mecoder for Mac.
-#     - Add ability to choose the correct mencoder based on the platform.
-#  - Add ability to cancel mencoder while it's running.
-#  - Add UI for mencoder errors.
-#  - Update UI.
-#  - Add encoding options.
-#  - Add sound options.
-
 import tkinter as tk
 import tkinter.filedialog
 import os
