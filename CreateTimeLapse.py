@@ -3,11 +3,12 @@
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
 
 # TODO
-#  - Put code on github.
+#  - Change the default FPS to a better value.
+#  - Mac
+#     - Add mecoder for Mac.
+#     - Add ability to choose the correct mencoder based on the platform.
 #  - Add ability to cancel mencoder while it's running.
-#  - Put the movie in the directory of the images.
-#  - Add file selector for mencoder.
-#  - Test on Mac.
+#  - Add UI for mencoder errors.
 #  - Update UI.
 #  - Add encoding options.
 #  - Add sound options.
@@ -16,17 +17,35 @@ import tkinter as tk
 import tkinter.filedialog
 import os
 
-def GetEncoderPath():
+def GetMencoderPath():
 	"""Returns the path to mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
 	which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite."""
-	return r"c:\apps\mplayer\mencoder.exe"
+	return os.path.realpath("./mplayer/Windows/mencoder.exe")
 
 def CreateMovieFromImages(imageFileNames, framesPerSecond):
+	"""imageFileNames should be a list of images whose length is at least 1.
+	"""
+	inputDirectory = os.path.dirname(imageFileNames[1])
+	moviePath = "{}/TimeLapse.avi".format(inputDirectory)
+
 	imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
-	command = r"{} mf://{} -mf type=jpg:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o TimeLapse.avi".format(GetEncoderPath(), imageFileNamesStr, framesPerSecond)
+
+	command = r"{} mf://{} -mf type=jpg:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o {}".format(
+		GetMencoderPath(),
+		imageFileNamesStr,
+		framesPerSecond,
+		moviePath)
 	print(command)
+
 	print()
-	os.system(command)
+	exitStatus = os.system(command)
+	print()
+
+	if (exitStatus != 0):
+		print("mencoder failed with code {}.".format(exitStatus))
+		return False
+
+	print("Created movie: {}".format(moviePath))
 
 class TimeLapseVideoFromImagesDialog(tk.Frame):
 	def __init__(self, window):
