@@ -104,11 +104,14 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			self,
 			text="Frames per second:").pack()
 
+		frameVar = tk.StringVar()
+		frameVar.set(24)
 		self.framesPerSecondControl = tk.Spinbox(
 			self,
 			from_=10,
 			to=60,
 			increment=2,
+			textvariable=frameVar,
 			width=4)
 		self.framesPerSecondControl.pack()
 
