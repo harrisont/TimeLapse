@@ -6,6 +6,17 @@ import tkinter as tk
 import tkinter.filedialog
 import os
 
+class LogLevel:
+	user=0
+	error=1
+	debug=2
+
+logLevel = LogLevel.error
+
+def Log(level, message):
+	if level <= logLevel:
+		print(message)
+
 def GetMencoderPath():
 	"""Returns the path to mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
 	which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite."""
@@ -24,17 +35,18 @@ def CreateMovieFromImages(imageFileNames, framesPerSecond):
 		imageFileNamesStr,
 		framesPerSecond,
 		moviePath)
-	print(command)
+	Log(LogLevel.debug, command)
+	Log(LogLevel.debug, "")
 
-	print()
 	exitStatus = os.system(command)
-	print()
+	Log(LogLevel.user, "")
 
 	if (exitStatus != 0):
-		print("mencoder failed with code {}.".format(exitStatus))
+		Log(LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
+		Log(LogLevel.user, "Error in creating movie.")
 		return False
 
-	print("Created movie: {}".format(moviePath))
+	Log(LogLevel.user, "Created movie: {}".format(moviePath))
 
 class TimeLapseVideoFromImagesDialog(tk.Frame):
 	def __init__(self, window):
@@ -126,8 +138,11 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		if not filesStr:
 			return
 
-		imageFileNames = filesStr[1:-1].split("} {")
+		imageFileNames = self.SplitFilesStr(filesStr)
 		self.SetImages(imageFileNames)
+
+	def SplitFilesStr(self, filesStr):
+		return [x.strip(" {}") for x in filesStr.split("{") if len(x) > 0]
 
 	def SetImages(self, imageFileNames):
 		self.imageFileNames = imageFileNames
