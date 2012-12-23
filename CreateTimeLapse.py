@@ -2,16 +2,18 @@
 # http://tkinter.unpythonic.net/wiki/tkFileDialog
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
 
+import os
+import pprint
 import tkinter as tk
 import tkinter.filedialog
-import os
 
 class LogLevel:
-	user=0
-	error=1
-	debug=2
+	user = 0
+	error = 1
+	debug = 2
+	verbose = 3
 
-logLevel = LogLevel.error
+logLevel = LogLevel.verbose
 
 def Log(level, message):
 	if level <= logLevel:
@@ -137,12 +139,38 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("All Files", ".*")])
 		if not filesStr:
 			return
+		Log(LogLevel.verbose, "File picker returned {}.".format(filesStr))
 
-		imageFileNames = self.SplitFilesStr(filesStr)
+		imageFileNames = self.SplitFilePickerFilesStr(filesStr)
+		Log(LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
+
 		self.SetImages(imageFileNames)
 
-	def SplitFilesStr(self, filesStr):
-		return [x.strip(" {}") for x in filesStr.split("{") if len(x) > 0]
+	@staticmethod
+	def SplitFilePickerFilesStr(filesStr):
+		"""
+		Given a file-list string returned from the file picker, returns a list of files.
+
+		The file picker normally returns files in the format "{path-1} {path-2} ... {path-n}",
+		but sometimes it does not put "{}" around a file.  This seems like a bug, but regardless,
+		we need to work around it.
+
+		>>> TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr("{D:/Foo/Bar/pic 1.jpg} {D:/Foo/Bar/pic 2.jpg} {D:/Foo/Bar/pic 3.jpg}")
+		['D:/Foo/Bar/pic 1.jpg', 'D:/Foo/Bar/pic 2.jpg', 'D:/Foo/Bar/pic 3.jpg']
+
+		>>> TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr("{C:/pic_1 - Copy (1).jpg} C:/pic_1.jpg")
+		['C:/pic_1 - Copy (1).jpg', 'C:/pic_1.jpg']
+
+		>>> TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr("C:/pic_1.jpg {C:/pic_1 - Copy (1).jpg}")
+		['C:/pic_1.jpg', 'C:/pic_1 - Copy (1).jpg']
+		"""
+		filesStr = filesStr.replace('}', '{')
+		files = [x.strip(" {}") for x in filesStr.split("{")]
+
+		# Filter out empty files.
+		files = [y for y in files if len(y) > 0]
+
+		return files
 
 	def SetImages(self, imageFileNames):
 		self.imageFileNames = imageFileNames
@@ -159,6 +187,10 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			self.framesPerSecondControl.get())
 
 if __name__=='__main__':
+	# Currently always run the doctests.
+	import doctest
+	doctest.testmod()
+
 	window = tk.Tk()
 	TimeLapseVideoFromImagesDialog(window).pack()
 	window.mainloop()
