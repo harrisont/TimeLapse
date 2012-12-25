@@ -264,7 +264,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		platform = GetPlatform()
 		if platform == Platform.windows:
 			# Windows returns a single string for the file list.
-			return SplitFilePickerFilesStr(files)
+			return TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr(files)
 		else:
 			# Mac returns a tuple of files.
 			# Also use this in the default case.
