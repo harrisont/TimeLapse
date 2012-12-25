@@ -28,10 +28,10 @@ class Platform:
 def GetPlatform():
 	if sys.platform == "darwin":
 		return Platform.mac
-	elif sys.platform == "Windows":
+	elif sys.platform in ["Windows", "win32"]:
 		return Platform.windows
 	else:
-		Log(LogLevel.error, "Unknown platform.  attempting to continue assuming Windows.")
+		Log(LogLevel.error, "Unknown platform '{}'.  Attempting to continue assuming Windows.".format(sys.platform))
 		return Platform.windows
 
 class ImageEncoding:
@@ -76,24 +76,31 @@ def GetImageEncodingFromExtension(extension):
 	1
 	>>> GetImageEncodingFromExtension("jpg")
 	1
+	>>> GetImageEncodingFromExtension("JPG")
+	1
 	>>> GetImageEncodingFromExtension(".jpeg")
 	1
 	>>> GetImageEncodingFromExtension(".png")
 	2
 	>>> GetImageEncodingFromExtension(".other")
+	(1) Unknown file extension 'other'
 	0
 	"""
-	strippedExtension = extension.strip('.')
+	strippedExtension = extension.strip('.').lower()
 	if strippedExtension in ['jpg', 'jpeg']:
 		return ImageEncoding.jpeg
 	elif strippedExtension == 'png':
 		return ImageEncoding.png
 	else:
+		Log(LogLevel.error, "Unknown file extension '{}'".format(strippedExtension))
 		return ImageEncoding.unknown
 
 class Mencoder:
 	def CreateMovieFromImages(imageFileNames, framesPerSecond):
 		imageEncoding = GetImageEncodingFromFileNames(imageFileNames)
+		if imageEncoding == ImageEncoding.unknown:
+			return
+
 		Mencoder.CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
 
 	def CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding):
