@@ -326,7 +326,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			moviePath = result
 			userMessage = "Created movie: {}".format(moviePath)
 		else:
-			userMessage = "Error in creating movie: '{}'."
+			userMessage = "Error in creating movie."
 
 		Log(LogLevel.user, userMessage)
 		self.statusLabel.config(text=userMessage)
