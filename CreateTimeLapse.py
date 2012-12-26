@@ -121,7 +121,7 @@ class Mencoder:
 		inputDirectory = os.path.dirname(imageFileNames[0])
 		moviePath = "{}/TimeLapse.avi".format(inputDirectory)
 
-		command = '"{}"" mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
+		command = '"{}" mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
 			Mencoder.GetMencoderPath(),
 			imageFileNamesStr,
 			imageEncodingStr,
@@ -326,7 +326,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			moviePath = result
 			userMessage = "Created movie: {}".format(moviePath)
 		else:
-			userMessage = "Error in creating movie: '{}'.".format(result)
+			userMessage = "Error in creating movie: '{}'."
 
 		Log(LogLevel.user, userMessage)
 		self.statusLabel.config(text=userMessage)
