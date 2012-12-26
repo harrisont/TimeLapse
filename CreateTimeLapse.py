@@ -101,7 +101,7 @@ class Mencoder:
 		if imageEncoding == ImageEncoding.unknown:
 			return
 
-		Mencoder.CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
+		return Mencoder.CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
 
 	def CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding):
 		"""imageFileNames should be a list of images whose length is at least 1.
@@ -320,7 +320,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			moviePath = result
 			userMessage = "Created movie: {}".format(moviePath)
 		else:
-			userMessage = "Error in creating movie."
+			userMessage = "Error in creating movie: '{}'.".format(result)
 
 		Log(LogLevel.user, userMessage)
 		self.statusLabel.config(text=userMessage)
