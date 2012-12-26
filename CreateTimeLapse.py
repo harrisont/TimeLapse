@@ -119,7 +119,7 @@ class Mencoder:
 		imageEncodingStr = Mencoder.GetImageEncodingStr(imageEncoding)
 
 		inputDirectory = os.path.dirname(imageFileNames[0])
-		moviePath = "{}/TimeLapse.avi".format(inputDirectory)
+		moviePath = os.path.join(inputDirectory, "TimeLapse.avi")
 
 		command = '{} mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
 			Mencoder.GetMencoderPath(),
