@@ -141,13 +141,23 @@ class Mencoder:
 		"""Returns the path to mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
 		which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite.
 		"""
+		return os.path.join(Mencoder.GetMencoderDirectory(), Mencoder.GetMencoderFile())
+
+	def GetMencoderDirectory():
 		platform = GetPlatform()
 		if platform == Platform.mac:
-			return os.path.realpath("./mplayer/Mac/mencoder")
+			return os.path.realpath("./mplayer/Mac/")
 		elif platform == Platform.windows:
-			return os.path.realpath("./mplayer/Windows/mencoder.exe")
+			return os.path.realpath("./mplayer/Windows/")
 		else:
 		 	raise ValueError("Unknown platform.")
+
+	def GetMencoderFile():
+		platform = GetPlatform()
+		if platform == Platform.windows:
+			return "mencoder.exe"
+		else:
+			return "mencoder"
 
 	def GetImageEncodingStr(encoding):
 		"""
