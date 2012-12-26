@@ -7,6 +7,7 @@ import os
 import pprint
 import tkinter as tk
 import tkinter.filedialog
+import subprocess
 import sys
 
 class LogLevel:
@@ -118,21 +119,32 @@ class Mencoder:
 		imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
 		imageEncodingStr = Mencoder.GetImageEncodingStr(imageEncoding)
 
-		inputDirectory = os.path.dirname(imageFileNames[0])
-		moviePath = os.path.join(inputDirectory, "TimeLapse.avi")
+		moviePath = 'TimeLapse.avi'
 
-		command = '{} mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
-			Mencoder.GetMencoderPath(),
-			imageFileNamesStr,
-			imageEncodingStr,
-			framesPerSecond,
-			moviePath)
-		Log(LogLevel.debug, command)
+		command = [
+			'"{}"'.format(Mencoder.GetMencoderFile()),
+			'mf://{}'.format(imageFileNamesStr),
+			'-mf',
+			'type={}:fps={}'.format(imageEncodingStr, framesPerSecond),
+			'-ovc',
+			'lavc',
+			'-lavcopts',
+			'vcodec=mpeg4:mbd=2:trell',
+			'-o',
+			'{}'.format(moviePath)]
+		Log(LogLevel.verbose, command)
 
-		exitStatus = os.system(command)
+		mencoderDirectory = Mencoder.GetMencoderDirectory()
+		Log(LogLevel.verbose, "mencoder directory = '{}'".format(mencoderDirectory))
+		os.chdir(mencoderDirectory)
+
+		exitStatus = subprocess.call(
+			command,
+			executable="mencoder.exe",
+			stderr=subprocess.STDOUT)
 
 		if (exitStatus == 0):
-			return moviePath
+			return os.path.realpath(moviePath)
 		else:
 			Log(LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
 			return False
