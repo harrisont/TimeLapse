@@ -15,11 +15,19 @@ class LogLevel:
 	debug = 2
 	verbose = 3
 
+	@staticmethod
+	def str(loglevel):
+		"""
+		>>> LogLevel.str(LogLevel.error)
+		'error'
+		"""
+		return ["user", "error", "debug", "verbose"][loglevel]
+
 logLevel = LogLevel.verbose
 
 def Log(level, message):
 	if level <= logLevel:
-		print("({}) {}".format(level, message))
+		print("({}) {}".format(LogLevel.str(level), message))
 
 class Platform:
 	mac = 0
@@ -83,7 +91,7 @@ def GetImageEncodingFromExtension(extension):
 	>>> GetImageEncodingFromExtension(".png")
 	2
 	>>> GetImageEncodingFromExtension(".other")
-	(1) Unknown file extension 'other'
+	(error) Unknown file extension 'other'
 	0
 	"""
 	strippedExtension = extension.strip('.').lower()
@@ -120,10 +128,8 @@ class Mencoder:
 			framesPerSecond,
 			moviePath)
 		Log(LogLevel.debug, command)
-		Log(LogLevel.debug, "")
 
 		exitStatus = os.system(command)
-		Log(LogLevel.user, "")
 
 		if (exitStatus == 0):
 			return moviePath
