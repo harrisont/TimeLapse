@@ -119,7 +119,8 @@ class Mencoder:
 		imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
 		imageEncodingStr = Mencoder.GetImageEncodingStr(imageEncoding)
 
-		moviePath = 'TimeLapse.avi'
+		inputDirectory = os.path.dirname(imageFileNames[0])
+		moviePath = os.path.join(inputDirectory, 'TimeLapse.avi')
 
 		command = [
 			'"{}"'.format(Mencoder.GetMencoderFile()),
@@ -291,45 +292,18 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 
 		self.SetImages(imageFileNames)
 
-	@staticmethod
-	def GetImageFileNames(files):
+	def GetImageFileNames(self, files):
 		"""The file picker returns different types on different platforms.
 		This handles each one.
 		"""
 		platform = GetPlatform()
 		if platform == Platform.windows:
 			# Windows returns a single string for the file list.
-			return TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr(files)
+			return self.window.tk.splitlist(files)
 		else:
 			# Mac returns a tuple of files.
 			# Also use this in the default case.
 			return files
-
-	@staticmethod
-	def SplitFilePickerFilesStr(filesStr):
-		"""
-		Given a file-list string returned from the file picker, returns a list of files.
-
-		The file picker normally returns files in the format "{path-1} {path-2} ... {path-n}",
-		but sometimes it does not put "{}" around a file.  This seems like a bug, but regardless,
-		we need to work around it.
-
-		>>> TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr("{D:/Foo/Bar/pic 1.jpg} {D:/Foo/Bar/pic 2.jpg} {D:/Foo/Bar/pic 3.jpg}")
-		['D:/Foo/Bar/pic 1.jpg', 'D:/Foo/Bar/pic 2.jpg', 'D:/Foo/Bar/pic 3.jpg']
-
-		>>> TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr("{C:/pic_1 - Copy (1).jpg} C:/pic_1.jpg")
-		['C:/pic_1 - Copy (1).jpg', 'C:/pic_1.jpg']
-
-		>>> TimeLapseVideoFromImagesDialog.SplitFilePickerFilesStr("C:/pic_1.jpg {C:/pic_1 - Copy (1).jpg}")
-		['C:/pic_1.jpg', 'C:/pic_1 - Copy (1).jpg']
-		"""
-		filesStr = filesStr.replace('}', '{')
-		files = [x.strip(" {}") for x in filesStr.split("{")]
-
-		# Filter out empty files.
-		files = [y for y in files if len(y) > 0]
-
-		return files
 
 	def SetImages(self, imageFileNames):
 		self.imageFileNames = imageFileNames
