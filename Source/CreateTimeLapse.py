@@ -108,21 +108,8 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		self.statusLabel.pack()
 
 	def InitImageScaleControl(self):
-		frame = tk.Frame(self)
-
-		sizeXFrame = tk.Frame(frame)
-		tk.Label(sizeXFrame, text='Width').pack(side=tk.LEFT)
-		self.scaledInputSizeX = TkinterWidgets.IntegerEntry(sizeXFrame)
-		self.scaledInputSizeX.pack()
-		sizeXFrame.pack()
-
-		sizeYFrame = tk.Frame(frame)
-		tk.Label(sizeYFrame, text='Height').pack(side=tk.LEFT)
-		self.scaledInputSizeY = TkinterWidgets.IntegerEntry(sizeYFrame)
-		self.scaledInputSizeY.pack()
-		sizeYFrame.pack()
-
-		frame.pack()
+		self.widthAndHeightControl = TkinterWidgets.WidthAndHeightControl(self)
+		self.widthAndHeightControl.pack()
 
 	def SelectImages(self):
 		"""Bring up a dialog to allow the user to select one or more images.
@@ -175,8 +162,14 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
 	def CreateMovieFromImages(self):
-		width = self.scaledInputSizeX.get()
-		height = self.scaledInputSizeY.get()
+		width = self.widthAndHeightControl.GetWidth()
+		height = self.widthAndHeightControl.GetHeight()
+
+		if not self.widthAndHeightControl.IsValid():
+			userMessage = "Invalid image scaling."
+			Log.Log(Log.LogLevel.user, userMessage)
+			self.statusLabel.config(text=userMessage)
+			return
 
 		result = Mencoder.CreateMovieFromImages(
 			self.imageFileNames,
