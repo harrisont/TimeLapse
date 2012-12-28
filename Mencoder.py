@@ -13,17 +13,19 @@ import doctest
 import os
 import sys
 
-def CreateMovieFromImages(imageFileNames, framesPerSecond):
+def CreateMovieFromImages(imageFileNames, framesPerSecond, width=None, height=None):
+	"""imageFileNames should be a list of images whose length is at least 1.
+	Returns the path to the created movie or False on failure.
+
+	Note: width must be integer multiple of 4.  This is is a limitation of the RAW RGB AVI format.
+	"""
 	imageEncoding, errorMessage = ImageHelper.GetImageEncodingFromFileNames(imageFileNames)
 	if imageEncoding == ImageHelper.ImageEncoding.unknown:
 		return
 
 	return _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
 
-def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding):
-	"""imageFileNames should be a list of images whose length is at least 1.
-	Returns the path to the created movie or False on failure.
-	"""
+def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding, width=None, height=None):
 	imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
 	imageEncodingStr = _GetImageEncodingStr(imageEncoding)
 
