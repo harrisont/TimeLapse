@@ -122,28 +122,19 @@ class Mencoder:
 		inputDirectory = os.path.dirname(imageFileNames[0])
 		moviePath = os.path.join(inputDirectory, 'TimeLapse.avi')
 
-		command = [
-			'"{}"'.format(Mencoder.GetMencoderFile()),
-			'mf://{}'.format(imageFileNamesStr),
-			'-mf',
-			'type={}:fps={}'.format(imageEncodingStr, framesPerSecond),
-			'-ovc',
-			'lavc',
-			'-lavcopts',
-			'vcodec=mpeg4:mbd=2:trell',
-			'-o',
-			'{}'.format(moviePath)]
+		command = '{} mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
+			Mencoder.GetMencoderFile(),
+			imageFileNamesStr,
+			imageEncodingStr,
+			framesPerSecond,
+			moviePath)
 		Log(LogLevel.verbose, command)
 
 		mencoderDirectory = Mencoder.GetMencoderDirectory()
 		rootDirectory = os.getcwd()
 		Log(LogLevel.verbose, "mencoder directory = '{}'".format(mencoderDirectory))
-
 		os.chdir(mencoderDirectory)
-		exitStatus = subprocess.call(
-			command,
-			executable="mencoder.exe",
-			stderr=subprocess.STDOUT)
+		exitStatus = os.system(command)
 		os.chdir(rootDirectory)
 
 		if (exitStatus == 0):
