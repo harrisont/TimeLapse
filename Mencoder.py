@@ -50,7 +50,7 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 	if (exitStatus == 0):
 		return os.path.realpath(moviePath)
 	else:
-		Log.Log(Log.LLogLevel.error, "mencoder failed with code {}.".format(exitStatus))
+		Log.Log(Log.LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
 		return False
 
 def _GetMencoderPath():
