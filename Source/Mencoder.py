@@ -66,9 +66,9 @@ def _GetMencoderPath():
 def _GetMencoderDirectory():
 	platform = Platform.GetPlatform()
 	if platform == Platform.Platforms.mac:
-		return os.path.realpath("./mplayer/Mac/")
+		return os.path.realpath("../mplayer/Mac/")
 	elif platform == Platform.Platforms.windows:
-		return os.path.realpath("./mplayer/Windows/")
+		return os.path.realpath("../mplayer/Windows/")
 	else:
 	 	raise ValueError("Unknown platform.")
 
