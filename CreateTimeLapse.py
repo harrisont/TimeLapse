@@ -44,9 +44,9 @@ def GetPlatform():
 		return Platform.windows
 
 class ImageEncoding:
-	unknown = 0
-	jpeg = 1
-	png = 2
+	unknown = 'unknown'
+	jpeg = 'JPEG'
+	png = 'PNG'
 
 def GetImageEncodingFromFileNames(imageFileNames):
 	if len(imageFileNames) < 1:
@@ -72,9 +72,9 @@ def GetImageEncodingFromFileNames(imageFileNames):
 def GetImageEncodingFromFileName(imageFileName):
 	"""
 	>>> GetImageEncodingFromFileName("~/Foo.jpg")
-	1
+	'JPEG'
 	>>> GetImageEncodingFromFileName("Foo.png")
-	2
+	'PNG'
 	"""
 	root, extension = os.path.splitext(imageFileName)
 	return GetImageEncodingFromExtension(extension)
@@ -82,18 +82,18 @@ def GetImageEncodingFromFileName(imageFileName):
 def GetImageEncodingFromExtension(extension):
 	"""
 	>>> GetImageEncodingFromExtension(".jpg")
-	1
+	'JPEG'
 	>>> GetImageEncodingFromExtension("jpg")
-	1
+	'JPEG'
 	>>> GetImageEncodingFromExtension("JPG")
-	1
+	'JPEG'
 	>>> GetImageEncodingFromExtension(".jpeg")
-	1
+	'JPEG'
 	>>> GetImageEncodingFromExtension(".png")
-	2
+	'PNG'
 	>>> GetImageEncodingFromExtension(".other")
 	(error) Unknown file extension 'other'
-	0
+	'unknown'
 	"""
 	strippedExtension = extension.strip('.').lower()
 	if strippedExtension in ['jpg', 'jpeg']:
