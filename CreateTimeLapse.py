@@ -49,17 +49,29 @@ class ImageEncoding:
 	png = 'PNG'
 
 def GetImageEncodingFromFileNames(imageFileNames):
+	"""
+	>>> GetImageEncodingFromFileNames(["Foo1.jpg", "Foo2.jpg"])
+	('JPEG', '')
+	>>> GetImageEncodingFromFileNames(["Foo1.png"])
+	('PNG', '')
+	>>> GetImageEncodingFromFileNames(["Foo1.jpg", "Foo2.png"])
+	('unknown', "Mixed image encodings: 'Foo1.jpg' has encoding 'JPEG', but 'Foo2.png' has encoding 'PNG'.")
+	>>> GetImageEncodingFromFileNames(["Foo1.bar", "Foo2.jpg"])
+	('unknown', "Unknown file extension 'bar'.")
+	"""
 	if len(imageFileNames) < 1:
 		raise ValueError("You must pass in at least 1 image.")
 
 	firstImageFileName = imageFileNames[0]
-	firstEncoding = GetImageEncodingFromFileName(firstImageFileName)
+	firstEncoding, errorMessage = GetImageEncodingFromFileName(firstImageFileName)
 	if firstEncoding == ImageEncoding.unknown:
-		return firstEncoding, ''
+		return firstEncoding, errorMessage
 
 	# Validate that there are not multiple encodings in the different files.
 	for otherImageFileName in imageFileNames[1:]:
-		otherEncoding = GetImageEncodingFromFileName(otherImageFileName)
+		otherEncoding, errorMessage = GetImageEncodingFromFileName(otherImageFileName)
+		if otherEncoding == ImageEncoding.unknown:
+			return otherEncoding, errorMessage
 		if otherEncoding != firstEncoding:
 			errorMessage = "Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'.".format(
 				firstImageFileName,
@@ -73,37 +85,38 @@ def GetImageEncodingFromFileNames(imageFileNames):
 def GetImageEncodingFromFileName(imageFileName):
 	"""
 	>>> GetImageEncodingFromFileName("~/Foo.jpg")
-	'JPEG'
+	('JPEG', '')
 	>>> GetImageEncodingFromFileName("Foo.png")
-	'PNG'
+	('PNG', '')
+	>>> GetImageEncodingFromFileName("Foo.bar")
+	('unknown', "Unknown file extension 'bar'.")
 	"""
 	root, extension = os.path.splitext(imageFileName)
 	return GetImageEncodingFromExtension(extension)
 
+# Returns (ImageEncoding, error-message)
 def GetImageEncodingFromExtension(extension):
 	"""
 	>>> GetImageEncodingFromExtension(".jpg")
-	'JPEG'
+	('JPEG', '')
 	>>> GetImageEncodingFromExtension("jpg")
-	'JPEG'
+	('JPEG', '')
 	>>> GetImageEncodingFromExtension("JPG")
-	'JPEG'
+	('JPEG', '')
 	>>> GetImageEncodingFromExtension(".jpeg")
-	'JPEG'
+	('JPEG', '')
 	>>> GetImageEncodingFromExtension(".png")
-	'PNG'
+	('PNG', '')
 	>>> GetImageEncodingFromExtension(".other")
-	(error) Unknown file extension 'other'
-	'unknown'
+	('unknown', "Unknown file extension 'other'.")
 	"""
 	strippedExtension = extension.strip('.').lower()
 	if strippedExtension in ['jpg', 'jpeg']:
-		return ImageEncoding.jpeg
+		return ImageEncoding.jpeg, ''
 	elif strippedExtension == 'png':
-		return ImageEncoding.png
+		return ImageEncoding.png, ''
 	else:
-		Log(LogLevel.error, "Unknown file extension '{}'".format(strippedExtension))
-		return ImageEncoding.unknown
+		return ImageEncoding.unknown, "Unknown file extension '{}'.".format(strippedExtension)
 
 class Mencoder:
 	def CreateMovieFromImages(imageFileNames, framesPerSecond):
@@ -283,6 +296,8 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 
 		imageFileNames = self.GetImageFileNames(files)
 		Log(LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
+
+		self.statusLabel.config(text='')
 
 		encoding, errorMessage = GetImageEncodingFromFileNames(imageFileNames)
 		if encoding == ImageEncoding.unknown:
