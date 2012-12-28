@@ -275,7 +275,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		files = tk.filedialog.askopenfilenames(
 			parent=self.window,
 			title="Select Images",
-			filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("All Files", ".*")])
+			filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("All Files", ".*")])
 		if not files:
 			return
 		Log(LogLevel.verbose, "File picker returned \n{}.".format(pprint.pformat(files)))
