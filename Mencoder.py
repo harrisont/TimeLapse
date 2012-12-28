@@ -1,6 +1,8 @@
 """
-Defines methods to use mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
-which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite.
+Defines methods to use MEncoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
+which is in the MPlayer (http://www.mplayerhq.hu/design7/news.html) suite.
+
+MPlayer/MEncoder man page: http://tivo-mplayer.sourceforge.net/docs/mplayer-man.html.
 """
 
 import ImageHelper
