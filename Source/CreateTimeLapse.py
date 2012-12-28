@@ -6,6 +6,7 @@ import ImageHelper
 import Log
 import Mencoder
 import Platform
+import TkinterWidgets
 
 import doctest
 import pprint
@@ -29,6 +30,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		self.InitSelectImagesButton()
 		self.InitImagesListControl()
 		self.InitFramesRateControl()
+		self.InitImageScaleControl()
 		self.InitCreateMovieFromImagesButton()
 		self.InitStatusControl()
 
@@ -100,6 +102,11 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 	def InitStatusControl(self):
 		self.statusLabel = tk.Label(self)
 		self.statusLabel.pack()
+
+	def InitImageScaleControl(self):
+		tk.Label(self, text='Width').pack()
+		self.scaledWidthInput = TkinterWidgets.IntegerEntry(self)
+		self.scaledWidthInput.pack()
 
 	def SelectImages(self):
 		"""Bring up a dialog to allow the user to select one or more images.
