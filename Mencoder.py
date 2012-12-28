@@ -23,7 +23,7 @@ def CreateMovieFromImages(imageFileNames, framesPerSecond, width=None, height=No
 	if imageEncoding == ImageHelper.ImageEncoding.unknown:
 		return
 
-	return _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
+	return _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding, width, height)
 
 def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding, width=None, height=None):
 	imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
@@ -32,11 +32,18 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 	inputDirectory = os.path.dirname(imageFileNames[0])
 	moviePath = os.path.join(inputDirectory, 'TimeLapse.avi')
 
-	command = '{} mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
+	scaleOption = ''
+	if width and height:
+		scaleOption = '-vf scale={}:{}'.format(width, height)
+	elif width or height:
+		raise ValueError('To scale the images, you must specify both the width and the height.')
+
+	command = '{} mf://{} -mf type={}:fps={} {} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
 		_GetMencoderFile(),
 		imageFileNamesStr,
 		imageEncodingStr,
 		framesPerSecond,
+		scaleOption,
 		moviePath)
 	Log.Log(Log.LogLevel.verbose, command)
 
