@@ -136,13 +136,15 @@ class Mencoder:
 		Log(LogLevel.verbose, command)
 
 		mencoderDirectory = Mencoder.GetMencoderDirectory()
+		rootDirectory = os.getcwd()
 		Log(LogLevel.verbose, "mencoder directory = '{}'".format(mencoderDirectory))
-		os.chdir(mencoderDirectory)
 
+		os.chdir(mencoderDirectory)
 		exitStatus = subprocess.call(
 			command,
 			executable="mencoder.exe",
 			stderr=subprocess.STDOUT)
+		os.chdir(rootDirectory)
 
 		if (exitStatus == 0):
 			return os.path.realpath(moviePath)
