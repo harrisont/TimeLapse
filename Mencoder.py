@@ -16,27 +16,27 @@ def CreateMovieFromImages(imageFileNames, framesPerSecond):
 	if imageEncoding == ImageHelper.ImageEncoding.unknown:
 		return
 
-	return CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
+	return _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
 
-def CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding):
+def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding):
 	"""imageFileNames should be a list of images whose length is at least 1.
 	Returns the path to the created movie or False on failure.
 	"""
 	imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
-	imageEncodingStr = GetImageEncodingStr(imageEncoding)
+	imageEncodingStr = _GetImageEncodingStr(imageEncoding)
 
 	inputDirectory = os.path.dirname(imageFileNames[0])
 	moviePath = os.path.join(inputDirectory, 'TimeLapse.avi')
 
 	command = '{} mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
-		GetMencoderFile(),
+		_GetMencoderFile(),
 		imageFileNamesStr,
 		imageEncodingStr,
 		framesPerSecond,
 		moviePath)
 	Log.Log(Log.LogLevel.verbose, command)
 
-	mencoderDirectory = GetMencoderDirectory()
+	mencoderDirectory = _GetMencoderDirectory()
 	rootDirectory = os.getcwd()
 	Log.Log(Log.LogLevel.verbose, "mencoder directory = '{}'".format(mencoderDirectory))
 	os.chdir(mencoderDirectory)
@@ -49,10 +49,10 @@ def CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imag
 		Log.Log(Log.LLogLevel.error, "mencoder failed with code {}.".format(exitStatus))
 		return False
 
-def GetMencoderPath():
-	return os.path.join(GetMencoderDirectory(), GetMencoderFile())
+def _GetMencoderPath():
+	return os.path.join(_GetMencoderDirectory(), _GetMencoderFile())
 
-def GetMencoderDirectory():
+def _GetMencoderDirectory():
 	platform = Platform.GetPlatform()
 	if platform == Platform.Platforms.mac:
 		return os.path.realpath("./mplayer/Mac/")
@@ -61,18 +61,18 @@ def GetMencoderDirectory():
 	else:
 	 	raise ValueError("Unknown platform.")
 
-def GetMencoderFile():
+def _GetMencoderFile():
 	platform = Platform.GetPlatform()
 	if platform == Platform.Platforms.windows:
 		return "mencoder.exe"
 	else:
 		return "mencoder"
 
-def GetImageEncodingStr(encoding):
+def _GetImageEncodingStr(encoding):
 	"""
-	>>> GetImageEncodingStr(ImageHelper.ImageEncoding.jpeg)
+	>>> _GetImageEncodingStr(ImageHelper.ImageEncoding.jpeg)
 	'jpg'
-	>>> GetImageEncodingStr(ImageHelper.ImageEncoding.png)
+	>>> _GetImageEncodingStr(ImageHelper.ImageEncoding.png)
 	'png'
 	"""
 	if encoding == ImageHelper.ImageEncoding.jpeg:
