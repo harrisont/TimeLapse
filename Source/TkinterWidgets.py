@@ -6,31 +6,31 @@ class IntegerEntry(tk.Entry):
 	def __init__(self, parent, **keywordArgs):
 		tk.Entry.__init__(self, parent, keywordArgs)
 
-		isValidCommand = self.register(IntegerEntry.IsValid)
+		isValidCommand = self.register(IntegerEntry._IsValidStatic)
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
 
 	@staticmethod
-	def IsValid(text):
+	def _IsValidStatic(text):
 		"""
-		>>> IntegerEntry.IsValid('123')
+		>>> IntegerEntry._IsValidStatic('123')
 		True
 
-		>>> IntegerEntry.IsValid('')
+		>>> IntegerEntry._IsValidStatic('')
 		True
 
-		>>> IntegerEntry.IsValid('1.5')
+		>>> IntegerEntry._IsValidStatic('1.5')
 		False
 
-		>>> IntegerEntry.IsValid('-2')
+		>>> IntegerEntry._IsValidStatic('-2')
 		True
 
-		>>> IntegerEntry.IsValid(' ')
+		>>> IntegerEntry._IsValidStatic(' ')
 		False
 
-		>>> IntegerEntry.IsValid('a')
+		>>> IntegerEntry._IsValidStatic('a')
 		False
 
-		>>> IntegerEntry.IsValid('1a')
+		>>> IntegerEntry._IsValidStatic('1a')
 		False
 		"""
 		try:
