@@ -55,19 +55,20 @@ def GetImageEncodingFromFileNames(imageFileNames):
 	firstImageFileName = imageFileNames[0]
 	firstEncoding = GetImageEncodingFromFileName(firstImageFileName)
 	if firstEncoding == ImageEncoding.unknown:
-		return firstEncoding
+		return firstEncoding, ''
 
 	# Validate that there are not multiple encodings in the different files.
 	for otherImageFileName in imageFileNames[1:]:
 		otherEncoding = GetImageEncodingFromFileName(otherImageFileName)
 		if otherEncoding != firstEncoding:
-			raise ValueError("Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'.".format(
+			errorMessage = "Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'.".format(
 				firstImageFileName,
 				firstEncoding,
 				otherImageFileName,
-				otherEncoding))
+				otherEncoding)
+			return ImageEncoding.unknown, errorMessage
 
-	return firstEncoding
+	return firstEncoding, ''
 
 def GetImageEncodingFromFileName(imageFileName):
 	"""
@@ -106,7 +107,7 @@ def GetImageEncodingFromExtension(extension):
 
 class Mencoder:
 	def CreateMovieFromImages(imageFileNames, framesPerSecond):
-		imageEncoding = GetImageEncodingFromFileNames(imageFileNames)
+		imageEncoding, errorMessage = GetImageEncodingFromFileNames(imageFileNames)
 		if imageEncoding == ImageEncoding.unknown:
 			return
 
@@ -282,6 +283,12 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 
 		imageFileNames = self.GetImageFileNames(files)
 		Log(LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
+
+		encoding, errorMessage = GetImageEncodingFromFileNames(imageFileNames)
+		if encoding == ImageEncoding.unknown:
+			Log(LogLevel.user, errorMessage)
+			self.statusLabel.config(text=errorMessage)
+			return
 
 		self.SetImages(imageFileNames)
 
