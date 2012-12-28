@@ -2,199 +2,17 @@
 # http://tkinter.unpythonic.net/wiki/tkFileDialog
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
 
+import ImageHelper
+import Log
+import Mencoder
+import Platform
+
 import doctest
-import os
 import pprint
 import tkinter as tk
 import tkinter.filedialog
-import subprocess
-import sys
 
-class LogLevel:
-	user = 0
-	error = 1
-	debug = 2
-	verbose = 3
-
-	@staticmethod
-	def str(loglevel):
-		"""
-		>>> LogLevel.str(LogLevel.error)
-		'error'
-		"""
-		return ["user", "error", "debug", "verbose"][loglevel]
-
-logLevel = LogLevel.verbose
-
-def Log(level, message):
-	if level <= logLevel:
-		print("({}) {}".format(LogLevel.str(level), message))
-
-class Platform:
-	mac = 0
-	windows = 1
-
-def GetPlatform():
-	if sys.platform == "darwin":
-		return Platform.mac
-	elif sys.platform in ["Windows", "win32"]:
-		return Platform.windows
-	else:
-		Log(LogLevel.error, "Unknown platform '{}'.  Attempting to continue assuming Windows.".format(sys.platform))
-		return Platform.windows
-
-class ImageEncoding:
-	unknown = 'unknown'
-	jpeg = 'JPEG'
-	png = 'PNG'
-
-def GetImageEncodingFromFileNames(imageFileNames):
-	"""
-	>>> GetImageEncodingFromFileNames(["Foo1.jpg", "Foo2.jpg"])
-	('JPEG', '')
-	>>> GetImageEncodingFromFileNames(["Foo1.png"])
-	('PNG', '')
-	>>> GetImageEncodingFromFileNames(["Foo1.jpg", "Foo2.png"])
-	('unknown', "Mixed image encodings: 'Foo1.jpg' has encoding 'JPEG', but 'Foo2.png' has encoding 'PNG'.")
-	>>> GetImageEncodingFromFileNames(["Foo1.bar", "Foo2.jpg"])
-	('unknown', "Unknown file extension 'bar'.")
-	"""
-	if len(imageFileNames) < 1:
-		raise ValueError("You must pass in at least 1 image.")
-
-	firstImageFileName = imageFileNames[0]
-	firstEncoding, errorMessage = GetImageEncodingFromFileName(firstImageFileName)
-	if firstEncoding == ImageEncoding.unknown:
-		return firstEncoding, errorMessage
-
-	# Validate that there are not multiple encodings in the different files.
-	for otherImageFileName in imageFileNames[1:]:
-		otherEncoding, errorMessage = GetImageEncodingFromFileName(otherImageFileName)
-		if otherEncoding == ImageEncoding.unknown:
-			return otherEncoding, errorMessage
-		if otherEncoding != firstEncoding:
-			errorMessage = "Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'.".format(
-				firstImageFileName,
-				firstEncoding,
-				otherImageFileName,
-				otherEncoding)
-			return ImageEncoding.unknown, errorMessage
-
-	return firstEncoding, ''
-
-def GetImageEncodingFromFileName(imageFileName):
-	"""
-	>>> GetImageEncodingFromFileName("~/Foo.jpg")
-	('JPEG', '')
-	>>> GetImageEncodingFromFileName("Foo.png")
-	('PNG', '')
-	>>> GetImageEncodingFromFileName("Foo.bar")
-	('unknown', "Unknown file extension 'bar'.")
-	"""
-	root, extension = os.path.splitext(imageFileName)
-	return GetImageEncodingFromExtension(extension)
-
-# Returns (ImageEncoding, error-message)
-def GetImageEncodingFromExtension(extension):
-	"""
-	>>> GetImageEncodingFromExtension(".jpg")
-	('JPEG', '')
-	>>> GetImageEncodingFromExtension("jpg")
-	('JPEG', '')
-	>>> GetImageEncodingFromExtension("JPG")
-	('JPEG', '')
-	>>> GetImageEncodingFromExtension(".jpeg")
-	('JPEG', '')
-	>>> GetImageEncodingFromExtension(".png")
-	('PNG', '')
-	>>> GetImageEncodingFromExtension(".other")
-	('unknown', "Unknown file extension 'other'.")
-	"""
-	strippedExtension = extension.strip('.').lower()
-	if strippedExtension in ['jpg', 'jpeg']:
-		return ImageEncoding.jpeg, ''
-	elif strippedExtension == 'png':
-		return ImageEncoding.png, ''
-	else:
-		return ImageEncoding.unknown, "Unknown file extension '{}'.".format(strippedExtension)
-
-class Mencoder:
-	"""Defines methods to use mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
-	which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite.
-	"""
-
-	def CreateMovieFromImages(imageFileNames, framesPerSecond):
-		imageEncoding, errorMessage = GetImageEncodingFromFileNames(imageFileNames)
-		if imageEncoding == ImageEncoding.unknown:
-			return
-
-		return Mencoder.CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding)
-
-	def CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding):
-		"""imageFileNames should be a list of images whose length is at least 1.
-		Returns the path to the created movie or False on failure.
-		"""
-		imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
-		imageEncodingStr = Mencoder.GetImageEncodingStr(imageEncoding)
-
-		inputDirectory = os.path.dirname(imageFileNames[0])
-		moviePath = os.path.join(inputDirectory, 'TimeLapse.avi')
-
-		command = '{} mf://{} -mf type={}:fps={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
-			Mencoder.GetMencoderFile(),
-			imageFileNamesStr,
-			imageEncodingStr,
-			framesPerSecond,
-			moviePath)
-		Log(LogLevel.verbose, command)
-
-		mencoderDirectory = Mencoder.GetMencoderDirectory()
-		rootDirectory = os.getcwd()
-		Log(LogLevel.verbose, "mencoder directory = '{}'".format(mencoderDirectory))
-		os.chdir(mencoderDirectory)
-		exitStatus = os.system(command)
-		os.chdir(rootDirectory)
-
-		if (exitStatus == 0):
-			return os.path.realpath(moviePath)
-		else:
-			Log(LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
-			return False
-
-	def GetMencoderPath():
-		return os.path.join(Mencoder.GetMencoderDirectory(), Mencoder.GetMencoderFile())
-
-	def GetMencoderDirectory():
-		platform = GetPlatform()
-		if platform == Platform.mac:
-			return os.path.realpath("./mplayer/Mac/")
-		elif platform == Platform.windows:
-			return os.path.realpath("./mplayer/Windows/")
-		else:
-		 	raise ValueError("Unknown platform.")
-
-	def GetMencoderFile():
-		platform = GetPlatform()
-		if platform == Platform.windows:
-			return "mencoder.exe"
-		else:
-			return "mencoder"
-
-	def GetImageEncodingStr(encoding):
-		"""
-		>>> Mencoder.GetImageEncodingStr(ImageEncoding.jpeg)
-		'jpg'
-		>>> Mencoder.GetImageEncodingStr(ImageEncoding.png)
-		'png'
-		"""
-		if encoding == ImageEncoding.jpeg:
-			return 'jpg'
-		elif encoding == ImageEncoding.png:
-			return 'png'
-		elif encoding == ImageEncoding.unknown:
-			raise ValueError("Unknown encoding.")
-		else:
-			raise ValueError("Encoding '{}' is not supported.".format(encoding))
+Log.logLevel = Log.LogLevel.verbose
 
 class TimeLapseVideoFromImagesDialog(tk.Frame):
 	def __init__(self, window):
@@ -293,18 +111,18 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("All Files", ".*")])
 		if not files:
 			return
-		Log(LogLevel.verbose, "File picker returned \n{}.".format(pprint.pformat(files)))
+		Log.Log(Log.LogLevel.verbose, "File picker returned \n{}.".format(pprint.pformat(files)))
 
 		imageFileNames = self.GetImageFileNames(files)
-		Log(LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
+		Log.Log(Log.LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
 
 		self.statusLabel.config(text='')
 
-		encoding, errorMessage = GetImageEncodingFromFileNames(imageFileNames)
-		if encoding == ImageEncoding.unknown:
-			Log(LogLevel.user, errorMessage)
+		encoding, errorMessage = ImageHelper.GetImageEncodingFromFileNames(imageFileNames)
+		if encoding == ImageHelper.ImageEncoding.unknown:
+			Log.Log(Log.LogLevel.user, errorMessage)
 			self.statusLabel.config(text=errorMessage)
-			return
+			imageFileNames = []
 
 		self.SetImages(imageFileNames)
 
@@ -312,8 +130,8 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		"""The file picker returns different types on different platforms.
 		This handles each one.
 		"""
-		platform = GetPlatform()
-		if platform == Platform.windows:
+		platform = Platform.GetPlatform()
+		if platform == Platform.Platforms.windows:
 			# Windows returns a single string for the file list.
 			return self.window.tk.splitlist(files)
 		else:
@@ -328,7 +146,10 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		self.imagesListControl.insert(0, *imageFileNames)
 
 		if len(imageFileNames) > 0:
-			self.createMovieFromImagesButton.config(state=tk.NORMAL)
+			createMovieButtonState = tk.NORMAL
+		else:
+			createMovieButtonState = tk.DISABLED
+		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
 	def CreateMovieFromImages(self):
 		result = Mencoder.CreateMovieFromImages(
@@ -340,7 +161,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		else:
 			userMessage = "Error in creating movie."
 
-		Log(LogLevel.user, userMessage)
+		Log.Log(Log.LogLevel.user, userMessage)
 		self.statusLabel.config(text=userMessage)
 
 def RunDocTests():
