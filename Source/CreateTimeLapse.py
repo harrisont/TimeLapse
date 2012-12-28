@@ -175,9 +175,8 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
 	def CreateMovieFromImages(self):
-		# Issue 16: add sizing options.
-		width = None
-		height = None
+		width = self.scaledInputSizeX.get()
+		height = self.scaledInputSizeY.get()
 
 		result = Mencoder.CreateMovieFromImages(
 			self.imageFileNames,
