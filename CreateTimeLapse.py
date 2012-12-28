@@ -119,6 +119,10 @@ def GetImageEncodingFromExtension(extension):
 		return ImageEncoding.unknown, "Unknown file extension '{}'.".format(strippedExtension)
 
 class Mencoder:
+	"""Defines methods to use mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
+	which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite.
+	"""
+
 	def CreateMovieFromImages(imageFileNames, framesPerSecond):
 		imageEncoding, errorMessage = GetImageEncodingFromFileNames(imageFileNames)
 		if imageEncoding == ImageEncoding.unknown:
@@ -158,9 +162,6 @@ class Mencoder:
 			return False
 
 	def GetMencoderPath():
-		"""Returns the path to mencoder (http://www.mplayerhq.hu/DOCS/HTML/en/mencoder.html),
-		which is in the mplayer (http://www.mplayerhq.hu/design7/news.html) suite.
-		"""
 		return os.path.join(Mencoder.GetMencoderDirectory(), Mencoder.GetMencoderFile())
 
 	def GetMencoderDirectory():
@@ -191,9 +192,9 @@ class Mencoder:
 		elif encoding == ImageEncoding.png:
 			return 'png'
 		elif encoding == ImageEncoding.unknown:
-			raise ValueError("Unknown encoding")
+			raise ValueError("Unknown encoding.")
 		else:
-			raise ValueError("Encoding '{}' is not supported".format(encoding))
+			raise ValueError("Encoding '{}' is not supported.".format(encoding))
 
 class TimeLapseVideoFromImagesDialog(tk.Frame):
 	def __init__(self, window):
