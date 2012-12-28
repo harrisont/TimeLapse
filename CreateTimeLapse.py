@@ -58,13 +58,13 @@ def GetImageEncodingFromFileNames(imageFileNames):
 		return firstEncoding
 
 	# Validate that there are not multiple encodings in the different files.
-	for imageFileName in imageFileNames[1:]:
-		otherEncoding = GetImageEncodingFromFileName(imageFileName)
+	for otherImageFileName in imageFileNames[1:]:
+		otherEncoding = GetImageEncodingFromFileName(otherImageFileName)
 		if otherEncoding != firstEncoding:
 			raise ValueError("Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'.".format(
 				firstImageFileName,
 				firstEncoding,
-				imageFileName,
+				otherImageFileName,
 				otherEncoding))
 
 	return firstEncoding
