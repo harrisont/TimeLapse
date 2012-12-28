@@ -84,14 +84,16 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		frame.pack()
 
 	def InitFramesRateControl(self):
+		frame = tk.Frame(self)
+
 		tk.Label(
-			self,
-			text="Frames per second:").pack()
+			frame,
+			text="Frames per second:").pack(side=tk.LEFT)
 
 		frameVar = tk.StringVar()
 		frameVar.set(24)
 		self.framesPerSecondControl = tk.Spinbox(
-			self,
+			frame,
 			from_=10,
 			to=60,
 			increment=2,
@@ -99,14 +101,28 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 			width=4)
 		self.framesPerSecondControl.pack()
 
+		frame.pack()
+
 	def InitStatusControl(self):
 		self.statusLabel = tk.Label(self)
 		self.statusLabel.pack()
 
 	def InitImageScaleControl(self):
-		tk.Label(self, text='Width').pack()
-		self.scaledWidthInput = TkinterWidgets.IntegerEntry(self)
-		self.scaledWidthInput.pack()
+		frame = tk.Frame(self)
+
+		sizeXFrame = tk.Frame(frame)
+		tk.Label(sizeXFrame, text='Width').pack(side=tk.LEFT)
+		self.scaledInputSizeX = TkinterWidgets.IntegerEntry(sizeXFrame)
+		self.scaledInputSizeX.pack()
+		sizeXFrame.pack()
+
+		sizeYFrame = tk.Frame(frame)
+		tk.Label(sizeYFrame, text='Height').pack(side=tk.LEFT)
+		self.scaledInputSizeY = TkinterWidgets.IntegerEntry(sizeYFrame)
+		self.scaledInputSizeY.pack()
+		sizeYFrame.pack()
+
+		frame.pack()
 
 	def SelectImages(self):
 		"""Bring up a dialog to allow the user to select one or more images.
