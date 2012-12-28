@@ -61,11 +61,11 @@ def GetImageEncodingFromFileNames(imageFileNames):
 	for imageFileName in imageFileNames[1:]:
 		otherEncoding = GetImageEncodingFromFileName(imageFileName)
 		if otherEncoding != firstEncoding:
-			raise ValueError("Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'".format(
-				firstImageFileName),
-				Mencoder.GetImageEncodingStr(firstImageFileName),
+			raise ValueError("Mixed image encodings: '{}' has encoding '{}', but '{}' has encoding '{}'.".format(
+				firstImageFileName,
+				firstEncoding,
 				imageFileName,
-				Mencoder.GetImageEncodingStr(imageFileName))
+				otherEncoding))
 
 	return firstEncoding
 
