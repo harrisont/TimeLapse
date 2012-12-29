@@ -173,11 +173,16 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			self.statusLabel.config(text=userMessage)
 			return
 
+		userMessage = "Creating movie..."
+		Log.Log(Log.LogLevel.user, userMessage)
+		self.statusLabel.config(text=userMessage)
+
 		result = Mencoder.CreateMovieFromImages(
 			self.imageFileNames,
 			self.framesPerSecondControl.get(),
 			width,
 			height)
+
 		if result:
 			moviePath = result
 			userMessage = "Created movie: {}".format(moviePath)
