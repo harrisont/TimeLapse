@@ -71,6 +71,7 @@ def _RunMencoderCommand(mencoderArgs):
 	mencoderDirectory = _GetMencoderDirectory()
 	rootDirectory = os.getcwd()
 	Log.Log(Log.LogLevel.verbose, "mencoder directory = '{}'".format(mencoderDirectory))
+
 	os.chdir(mencoderDirectory)
 	exitStatus = os.system(command)
 	os.chdir(rootDirectory)
