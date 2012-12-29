@@ -84,11 +84,19 @@ def _GetMencoderPath():
 def _GetMencoderDirectory():
 	platform = Platform.GetPlatform()
 	if platform == Platform.Platforms.mac:
-		return os.path.realpath("../External/mplayer/Mac/")
+		platformSpecificMplayerDirectory = 'Mac'
 	elif platform == Platform.Platforms.windows:
-		return os.path.realpath("../External/mplayer/Windows/")
+		platformSpecificMplayerDirectory = 'Windows'
 	else:
 	 	raise ValueError("Unknown platform.")
+
+	# This file is assumed to be under '<root>/Source/', so we need to go up one level.
+	return os.path.realpath(os.path.join(
+		os.path.dirname(__file__),
+		os.path.pardir,
+		'External',
+		'mplayer',
+		platformSpecificMplayerDirectory))
 
 def _GetMencoderFile():
 	platform = Platform.GetPlatform()
