@@ -38,13 +38,34 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 	elif width or height:
 		raise ValueError('To scale the images, you must specify both the width and the height.')
 
-	command = '{} mf://{} -mf type={}:fps={} {} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o "{}"'.format(
-		_GetMencoderFile(),
-		imageFileNamesStr,
-		imageEncodingStr,
-		framesPerSecond,
+	mencoderArgs = [
+		'mf://{}'.format(imageFileNamesStr),
+		'-mf type={}:fps={}'.format(imageEncodingStr, framesPerSecond),
 		scaleOption,
-		moviePath)
+		'-ovc',
+		'lavc',
+		'-lavcopts',
+		'vcodec=mpeg4:mbd=2:trell',
+		'-o',
+		'"{}"'.format(moviePath)
+		]
+
+	exitStatus = _RunMencoderCommand(mencoderArgs)
+
+	if (exitStatus == 0):
+		return os.path.realpath(moviePath)
+	else:
+		Log.Log(Log.LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
+		return False
+
+def _RunMencoderCommand(mencoderArgs):
+	"""menocderArgs is a list of arguments to pass to MEncoder.
+	It should not contain the MEncoder executable.
+	"""
+	command = '{} {}'.format(
+		_GetMencoderFile(),
+		' '.join(mencoderArgs))
+
 	Log.Log(Log.LogLevel.verbose, command)
 
 	mencoderDirectory = _GetMencoderDirectory()
@@ -54,11 +75,7 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 	exitStatus = os.system(command)
 	os.chdir(rootDirectory)
 
-	if (exitStatus == 0):
-		return os.path.realpath(moviePath)
-	else:
-		Log.Log(Log.LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
-		return False
+	return exitStatus
 
 def _GetMencoderPath():
 	return os.path.join(_GetMencoderDirectory(), _GetMencoderFile())
