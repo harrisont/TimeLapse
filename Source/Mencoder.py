@@ -15,7 +15,7 @@ import sys
 
 def CreateMovieFromImages(imageFileNames, framesPerSecond, width=None, height=None):
 	"""imageFileNames should be a list of images whose length is at least 1.
-	Returns the path to the created movie or False on failure.
+	Returns the path to the created movie or None on failure.
 
 	Note: width must be integer multiple of 4.  This is is a limitation of the RAW RGB AVI format.
 	"""
@@ -56,7 +56,7 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 		return os.path.realpath(moviePath)
 	else:
 		Log.Log(Log.LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
-		return False
+		return
 
 def _RunMencoderCommand(mencoderArgs):
 	"""menocderArgs is a list of arguments to pass to MEncoder.
