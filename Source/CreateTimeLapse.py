@@ -10,18 +10,20 @@ import TkinterWidgets
 
 import doctest
 import pprint
-import tkinter as tk
+import tkinter
+from tkinter import ttk
 import tkinter.filedialog
 
 Log.logLevel = Log.LogLevel.verbose
 
-class TimeLapseVideoFromImagesDialog(tk.Frame):
+class TimeLapseVideoFromImagesDialog(ttk.Frame):
 	def __init__(self, window):
-		tk.Frame.__init__(
+		ttk.Style().configure('TFrame', padx=5, pady=5)
+		ttk.Frame.__init__(
 			self,
 			window,
-			padx=5,
-			pady=5)
+			style='TFrame')
+
 		window.wm_title("TimeLapse")
 
 		self.window = window
@@ -35,41 +37,41 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		self.InitStatusControl()
 
 	def InitSelectImagesButton(self):
-		tk.Button(
+		ttk.Style().configure('TButton', padx=5, pady=5)
+		ttk.Button(
 			self,
 			text='Select Images',
 			command=self.SelectImages,
-			padx=5,
-			pady=5
-			).pack(fill=tk.constants.BOTH)
+			style='TButton'
+			).pack(fill=tkinter.constants.BOTH)
 
 	def InitCreateMovieFromImagesButton(self):
-		self.createMovieFromImagesButton = tk.Button(
+		ttk.Style().configure('TButton', padx=5, pady=5)
+		self.createMovieFromImagesButton = ttk.Button(
 			self,
 			text='Create Video From Images',
 			command=self.CreateMovieFromImages,
-			state=tk.DISABLED,
-			padx=5,
-			pady=5)
-		self.createMovieFromImagesButton.pack(fill=tk.constants.BOTH)
+			state=tkinter.DISABLED,
+			style='TButton')
+		self.createMovieFromImagesButton.pack(fill=tkinter.constants.BOTH)
 
 	def InitImagesListControl(self):
 		# Setup a list-box and scrollbars for it.
 		# See http://effbot.org/zone/tk-scrollbar-patterns.htm for scrollbar documentation.
 
-		frame = tk.Frame(
+		frame = ttk.Frame(
 			self,
 			borderwidth=2,
-			relief=tk.SUNKEN)
+			relief=tkinter.SUNKEN)
 		frame.grid_rowconfigure(0, weight=1)
 		frame.grid_columnconfigure(0, weight=1)
 
-		scrollbarY = tk.Scrollbar(frame)
-		scrollbarX = tk.Scrollbar(frame, orient=tk.HORIZONTAL)
-		scrollbarY.pack(side=tk.RIGHT, fill=tk.Y)
-		scrollbarX.pack(side=tk.BOTTOM, fill=tk.X)
+		scrollbarY = ttk.Scrollbar(frame)
+		scrollbarX = ttk.Scrollbar(frame, orient=tkinter.HORIZONTAL)
+		scrollbarY.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+		scrollbarX.pack(side=tkinter.BOTTOM, fill=tkinter.X)
 
-		self.imagesListControl = tk.Listbox(
+		self.imagesListControl = tkinter.Listbox(
 			frame,
 			borderwidth=0,
 			width=100,
@@ -84,27 +86,27 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		frame.pack()
 
 	def InitFramesRateControl(self):
-		frame = tk.Frame(self)
+		frame = ttk.Frame(self)
 
-		tk.Label(
+		ttk.Label(
 			frame,
-			text="Frames per second:").pack(side=tk.LEFT)
+			text="Frames per second:").pack(side=tkinter.LEFT)
 
-		frameVar = tk.StringVar()
-		frameVar.set(24)
-		self.framesPerSecondControl = tk.Spinbox(
+		frameRateVar = tkinter.StringVar()
+		frameRateVar.set(24)
+		self.framesPerSecondControl = tkinter.Spinbox(
 			frame,
 			from_=10,
 			to=60,
 			increment=2,
-			textvariable=frameVar,
+			textvariable=frameRateVar,
 			width=4)
 		self.framesPerSecondControl.pack()
 
 		frame.pack()
 
 	def InitStatusControl(self):
-		self.statusLabel = tk.Label(self)
+		self.statusLabel = ttk.Label(self)
 		self.statusLabel.pack()
 
 	def InitImageScaleControl(self):
@@ -115,7 +117,7 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 		"""Bring up a dialog to allow the user to select one or more images.
 		Return a list of the selected image file names.
 		"""
-		files = tk.filedialog.askopenfilenames(
+		files = tkinter.filedialog.askopenfilenames(
 			parent=self.window,
 			title="Select Images",
 			filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("All Files", ".*")])
@@ -152,13 +154,13 @@ class TimeLapseVideoFromImagesDialog(tk.Frame):
 	def SetImages(self, imageFileNames):
 		self.imageFileNames = imageFileNames
 
-		self.imagesListControl.delete(0, tk.END)
+		self.imagesListControl.delete(0, tkinter.END)
 		self.imagesListControl.insert(0, *imageFileNames)
 
 		if len(imageFileNames) > 0:
-			createMovieButtonState = tk.NORMAL
+			createMovieButtonState = tkinter.NORMAL
 		else:
-			createMovieButtonState = tk.DISABLED
+			createMovieButtonState = tkinter.DISABLED
 		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
 	def CreateMovieFromImages(self):
@@ -194,7 +196,7 @@ def main():
 	if not RunDocTests():
 		return
 
-	window = tk.Tk()
+	window = tkinter.Tk()
 	TimeLapseVideoFromImagesDialog(window).pack()
 	window.mainloop()
 
