@@ -183,6 +183,9 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			width,
 			height)
 
+		self.MencoderFinished(result)
+
+	def MencoderFinished(self, result):
 		if result:
 			moviePath = result
 			userMessage = "Created movie: {}".format(moviePath)
