@@ -9,6 +9,7 @@ import Platform
 import TkinterWidgets
 
 import doctest
+import multiprocessing
 import pprint
 import tkinter
 from tkinter import ttk
@@ -163,27 +164,67 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			createMovieButtonState = tkinter.DISABLED
 		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
-	def CreateMovieFromImages(self):
-		width = self.widthAndHeightControl.GetWidth()
-		height = self.widthAndHeightControl.GetHeight()
+	def GetScaledResolution(self):
+		return self.widthAndHeightControl.GetWidth(), self.widthAndHeightControl.GetHeight()
 
-		if not self.widthAndHeightControl.IsValid():
+	def ValidateScaledResolution(self):
+		if self.widthAndHeightControl.IsValid():
+			return True
+		else:
 			userMessage = "Invalid image scaling."
 			Log.Log(Log.LogLevel.user, userMessage)
 			self.statusLabel.config(text=userMessage)
+			return False
+
+	def GetFramesPerSecond(self):
+		return self.framesPerSecondControl.get()
+
+	def CreateMovieFromImages(self):
+		"""Use MEncoder to create a movie from the images.
+		Run it as a separate process and start checking to see if it is running (asynchronously).
+		"""
+		if not self.ValidateScaledResolution():
 			return
+		width, height = self.GetScaledResolution()
 
 		userMessage = "Creating movie..."
 		Log.Log(Log.LogLevel.user, userMessage)
 		self.statusLabel.config(text=userMessage)
 
-		result = Mencoder.CreateMovieFromImages(
-			self.imageFileNames,
-			self.framesPerSecondControl.get(),
-			width,
-			height)
+		resolutionStr = '<image-size>'
+		if width and height:
+			resolutionStr = '({}x{})'.format(width, height)
 
-		self.MencoderFinished(result)
+		Log.Log(Log.LogLevel.verbose, 'Creating movie: images="{}", FPS=({}), resolution={}'.format(
+			self.imageFileNames,
+			self.GetFramesPerSecond(),
+			resolutionStr))
+
+		self.mencoderResultQueue = multiprocessing.Queue()
+
+		self.mencoderProcess = multiprocessing.Process(
+			target=MencoderCreateMovieFromImagesBackgroundWrapper,
+			args=(
+				self.mencoderResultQueue,
+				self.imageFileNames,
+				self.GetFramesPerSecond(),
+				width,
+				height))
+		self.mencoderProcess.start()
+		self.CheckIfMencoderRunning()
+
+	def CheckIfMencoderRunning(self):
+		self.mencoderProcess.join(0)
+		if self.mencoderProcess.is_alive():
+			Log.Log(Log.LogLevel.verbose, 'MEncoder is still running; rescheduling check.')
+			self.ScheduleMencoderStatusCheck()
+		else:
+			result = self.mencoderResultQueue.get()
+			self.MencoderFinished(result)
+
+	def ScheduleMencoderStatusCheck(self):
+		mencoderIsRunningIntervalMilliseconds = 100
+		self.after(mencoderIsRunningIntervalMilliseconds, self.CheckIfMencoderRunning)
 
 	def MencoderFinished(self, result):
 		if result:
@@ -194,6 +235,18 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 		Log.Log(Log.LogLevel.user, userMessage)
 		self.statusLabel.config(text=userMessage)
+
+def MencoderCreateMovieFromImagesBackgroundWrapper(mencoderResultQueue, imageFileNames, framesPerSecond, width, height):
+	"""Wraps Mencoder.CreateMovieFromImages and stores the result in a multiprocessing.Queue.
+
+	This cannot be a member of TimeLapseVideoFromImagesDialog due to multiprocessing.Process' restrictions.
+	"""
+	result = Mencoder.CreateMovieFromImages(
+		imageFileNames,
+		framesPerSecond,
+		width,
+		height)
+	mencoderResultQueue.put(result)
 
 def RunDocTests():
 	numFailures, numTests = doctest.testmod()
