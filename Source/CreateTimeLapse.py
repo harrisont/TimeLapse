@@ -114,6 +114,10 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.widthAndHeightControl = TkinterWidgets.WidthAndHeightControl(self)
 		self.widthAndHeightControl.pack()
 
+	def UserMessage(self, message):
+		Log.Log(Log.LogLevel.user, message)
+		self.statusLabel.config(text=message)
+
 	def SelectImages(self):
 		"""Bring up a dialog to allow the user to select one or more images.
 		Return a list of the selected image file names.
@@ -133,8 +137,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 		encoding, errorMessage = ImageHelper.GetImageEncodingFromFileNames(imageFileNames)
 		if encoding == ImageHelper.ImageEncoding.unknown:
-			Log.Log(Log.LogLevel.user, errorMessage)
-			self.statusLabel.config(text=errorMessage)
+			self.UserMessage(errorMessage)
 			imageFileNames = []
 
 		self.SetImages(imageFileNames)
@@ -171,9 +174,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		if self.widthAndHeightControl.IsValid():
 			return True
 		else:
-			userMessage = "Invalid image scaling."
-			Log.Log(Log.LogLevel.user, userMessage)
-			self.statusLabel.config(text=userMessage)
+			self.UserMessage("Invalid image scaling.")
 			return False
 
 	def GetFramesPerSecond(self):
@@ -187,9 +188,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			return
 		width, height = self.GetScaledResolution()
 
-		userMessage = "Creating movie..."
-		Log.Log(Log.LogLevel.user, userMessage)
-		self.statusLabel.config(text=userMessage)
+		self.UserMessage("Creating movie...")
 
 		resolutionStr = '<image-size>'
 		if width and height:
@@ -229,12 +228,9 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 	def MencoderFinished(self, result):
 		if result:
 			moviePath = result
-			userMessage = "Created movie: {}".format(moviePath)
+			self.UserMessage("Created movie: {}".format(moviePath))
 		else:
-			userMessage = "Error in creating movie."
-
-		Log.Log(Log.LogLevel.user, userMessage)
-		self.statusLabel.config(text=userMessage)
+			self.UserMessage("Error in creating movie.")
 
 def MencoderCreateMovieFromImagesBackgroundWrapper(mencoderResultQueue, imageFileNames, framesPerSecond, width, height):
 	"""Wraps Mencoder.CreateMovieFromImages and stores the result in a multiprocessing.Queue.
