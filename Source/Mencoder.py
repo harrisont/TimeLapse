@@ -26,11 +26,13 @@ def CreateMovieFromImages(imageFileNames, framesPerSecond, width=None, height=No
 	return _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding, width, height)
 
 def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, imageEncoding, width=None, height=None):
-	imageFileNamesStr = '"' + '","'.join(imageFileNames) + '"'
 	imageEncodingStr = _GetImageEncodingStr(imageEncoding)
 
 	inputDirectory = os.path.dirname(imageFileNames[0])
 	moviePath = os.path.join(inputDirectory, 'TimeLapse.avi')
+
+	fileNameListFileName = os.path.join(inputDirectory, 'FileNames.txt')
+	WriteImageFileNames(fileNameListFileName, imageFileNames)
 
 	scaleOption = ''
 	if width and height:
@@ -39,7 +41,7 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 		raise ValueError('To scale the images, you must specify both the width and the height.')
 
 	mencoderArgs = [
-		'mf://{}'.format(imageFileNamesStr),
+		'"mf://@{}"'.format(fileNameListFileName),
 		'-mf type={}:fps={}'.format(imageEncodingStr, framesPerSecond),
 		scaleOption,
 		'-ovc',
@@ -57,6 +59,17 @@ def _CreateMovieFromImagesWithImageEncoding(imageFileNames, framesPerSecond, ima
 	else:
 		Log.Log(Log.LogLevel.error, "mencoder failed with code {}.".format(exitStatus))
 		return
+
+def WriteImageFileNames(imageFileNameListFileName, imageFileNames):
+	# Remove any existing file.
+	try:
+		os.remove(imageFileNameListFileName)
+	except OSError:
+		# Nothing to remove
+		pass
+
+	with open(imageFileNameListFileName, 'w') as fileNameListFile:
+		fileNameListFile.write('\n'.join(imageFileNames))
 
 def _RunMencoderCommand(mencoderArgs):
 	"""menocderArgs is a list of arguments to pass to MEncoder.
