@@ -114,9 +114,12 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.widthAndHeightControl = TkinterWidgets.WidthAndHeightControl(self)
 		self.widthAndHeightControl.pack()
 
+	def SetStatusLabel(self, text):
+		self.statusLabel.config(text=text)
+
 	def UserMessage(self, message):
 		Log.Log(Log.LogLevel.user, message)
-		self.statusLabel.config(text=message)
+		self.SetStatusLabel(message)
 
 	def SelectImages(self):
 		"""Bring up a dialog to allow the user to select one or more images.
@@ -133,7 +136,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		imageFileNames = self.GetImageFileNames(files)
 		Log.Log(Log.LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
 
-		self.statusLabel.config(text='')
+		self.SetStatusLabel('')
 
 		encoding, errorMessage = ImageHelper.GetImageEncodingFromFileNames(imageFileNames)
 		if encoding == ImageHelper.ImageEncoding.unknown:
