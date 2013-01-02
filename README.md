@@ -28,7 +28,9 @@ Create Standalone Executable
 ----------------------------
  1. Install cx_Freeze (http://cx-freeze.sourceforge.net/).
  2. Update CreateExecutable.py with the path to your python installation directory.
- 3. Run ```CreateExecutable.py build.```
+ 3. Run ```CreateExecutable.py build.```.
+ 4. The output will be under ```./build/```.
+ 5. Optionally zip the output up and send to users.
 
 Author
 ------
