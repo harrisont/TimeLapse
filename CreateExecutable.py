@@ -25,6 +25,7 @@ cx_Freeze.setup(
 		'build_exe': {
 			'compressed': True,
 			'include_msvcr': True,
+			'create_shared_zip': False,
 			'includes': [
 					'Mencoder',
 					'ImageHelper',
@@ -47,5 +48,6 @@ cx_Freeze.setup(
 			base = base,
 			icon = None,
 			copyDependentFiles = True,
+			appendScriptToExe = True,
 			),
 		])
