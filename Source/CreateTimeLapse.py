@@ -2,6 +2,7 @@
 # http://tkinter.unpythonic.net/wiki/tkFileDialog
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
 
+import Directories
 import ImageHelper
 import Log
 import Mencoder
@@ -29,6 +30,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			style='TFrame')
 
 		window.wm_title("TimeLapse")
+		window.iconbitmap(default=os.path.join(Directories.GetResourcesDirectory(), 'radian.ico'))
 
 		self.window = window
 		self.imageFileNames = []

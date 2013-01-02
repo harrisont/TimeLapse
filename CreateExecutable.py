@@ -34,7 +34,8 @@ cx_Freeze.setup(
 					'TkinterWidgets',
 					],
 			'include_files': [
-				'External/mplayer/'
+				'External/mplayer/',
+				'Resources/radian.ico',
 				],
 			'constants': [
 				'rootRelativePath=".."',
