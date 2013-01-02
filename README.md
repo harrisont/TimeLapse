@@ -18,10 +18,10 @@ Usage
 Dependencies
 ------------
 ##### Bundled with TimeLapse:
- * Python 3
  * mencoder (Part of the mplayer suite: www.mplayerhq.hu)
 
 ##### Not Bundled
+ * Python 3
  * cx_Freeze (http://cx-freeze.sourceforge.net/)
     * _(Windows-only)_ pywin32 (http://sourceforge.net/projects/pywin32/)
 
