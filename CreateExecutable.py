@@ -46,7 +46,7 @@ cx_Freeze.setup(
 			script = 'Source/CreateTimeLapse.py',
 			targetName = 'TimeLapse.exe',
 			base = base,
-			icon = None,
+			icon = 'Resources/radian.ico',
 			copyDependentFiles = True,
 			appendScriptToExe = True,
 			),
