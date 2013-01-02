@@ -262,7 +262,6 @@ def main():
 	if not sys.stdout:
 		RedirectOutputToNull()
 
-	# Currently always run the doctests.
 	if not RunDocTests():
 		return
 
