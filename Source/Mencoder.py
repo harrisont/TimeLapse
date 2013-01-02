@@ -13,6 +13,12 @@ import doctest
 import os
 import sys
 
+# The BUILD_CONSTANTS module only exists when using cx_Freeze.
+try:
+	import BUILD_CONSTANTS
+except ImportError:
+	pass
+
 def CreateMovieFromImages(imageFileNames, framesPerSecond, width=None, height=None):
 	"""imageFileNames should be a list of images whose length is at least 1.
 	Returns the path to the created movie or None on failure.
@@ -91,6 +97,23 @@ def _RunMencoderCommand(mencoderArgs):
 
 	return exitStatus
 
+def _GetRootDirectory():
+	try:
+		rootRelativePath = BUILD_CONSTANTS.rootRelativePath
+	except NameError:
+		# This file is assumed to be under '<root>/Source/', so we need to go up one level.
+		rootRelativePath = os.path.pardir
+
+	return os.path.realpath(os.path.join(
+		os.path.dirname(__file__),
+		rootRelativePath))
+
+def _GetExternalDirectory():
+	return os.path.join(_GetRootDirectory(), 'External')
+
+def _GetMplayerDirectory():
+	return os.path.join(_GetExternalDirectory(), 'mplayer')
+
 def _GetMencoderPath():
 	return os.path.join(_GetMencoderDirectory(), _GetMencoderFile())
 
@@ -103,13 +126,7 @@ def _GetMencoderDirectory():
 	else:
 	 	raise ValueError("Unknown platform.")
 
-	# This file is assumed to be under '<root>/Source/', so we need to go up one level.
-	return os.path.realpath(os.path.join(
-		os.path.dirname(__file__),
-		os.path.pardir,
-		'External',
-		'mplayer',
-		platformSpecificMplayerDirectory))
+	return os.path.join(_GetMplayerDirectory(), platformSpecificMplayerDirectory)
 
 def _GetMencoderFile():
 	platform = PlatformHelper.GetPlatform()
