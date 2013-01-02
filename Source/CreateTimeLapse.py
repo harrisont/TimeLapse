@@ -10,7 +10,9 @@ import TkinterWidgets
 
 import doctest
 import multiprocessing
+import os
 import pprint
+import sys
 import tkinter
 from tkinter import ttk
 import tkinter.filedialog
@@ -251,7 +253,15 @@ def RunDocTests():
 	numFailures, numTests = doctest.testmod()
 	return numFailures == 0
 
+def RedirectOutputToNull():
+	null = open(os.devnull, 'w')
+	sys.stdout = null
+	sys.stderr = null
+
 def main():
+	if not sys.stdout:
+		RedirectOutputToNull()
+
 	# Currently always run the doctests.
 	if not RunDocTests():
 		return
