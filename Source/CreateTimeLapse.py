@@ -9,10 +9,11 @@ import PlatformHelper
 import TkinterWidgets
 
 import doctest
-import multiprocessing
 import os
 import pprint
+import queue
 import sys
+import threading
 import tkinter
 from tkinter import ttk
 import tkinter.filedialog
@@ -204,12 +205,11 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			self.GetFramesPerSecond(),
 			resolutionStr))
 
-		self.mencoderResultQueue = multiprocessing.Queue()
+		self.resultQueue = queue.Queue()
 
-		self.mencoderProcess = multiprocessing.Process(
-			target=MencoderCreateMovieFromImagesBackgroundWrapper,
+		self.mencoderProcess = threading.Thread(
+			target=self.CreateMovieFromImagesAndStoreResult,
 			args=(
-				self.mencoderResultQueue,
 				self.imageFileNames,
 				self.GetFramesPerSecond(),
 				width,
@@ -217,13 +217,23 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.mencoderProcess.start()
 		self.CheckIfMencoderRunning()
 
+	def CreateMovieFromImagesAndStoreResult(self, imageFileNames, framesPerSecond, width, height):
+		"""Wraps CreateMovieFromImages and stores the result in a Queue.
+		"""
+		result = Mencoder.CreateMovieFromImages(
+			imageFileNames,
+			framesPerSecond,
+			width,
+			height)
+		self.resultQueue.put(result)
+
 	def CheckIfMencoderRunning(self):
 		self.mencoderProcess.join(0)
 		if self.mencoderProcess.is_alive():
 			Log.Log(Log.LogLevel.verbose, 'MEncoder is still running; rescheduling check.')
 			self.ScheduleMencoderStatusCheck()
 		else:
-			result = self.mencoderResultQueue.get()
+			result = self.resultQueue.get()
 			self.MencoderFinished(result)
 
 	def ScheduleMencoderStatusCheck(self):
@@ -236,18 +246,6 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			self.UserMessage("Created movie: {}".format(moviePath))
 		else:
 			self.UserMessage("Error in creating movie.")
-
-def MencoderCreateMovieFromImagesBackgroundWrapper(mencoderResultQueue, imageFileNames, framesPerSecond, width, height):
-	"""Wraps Mencoder.CreateMovieFromImages and stores the result in a multiprocessing.Queue.
-
-	This cannot be a member of TimeLapseVideoFromImagesDialog due to multiprocessing.Process' restrictions.
-	"""
-	result = Mencoder.CreateMovieFromImages(
-		imageFileNames,
-		framesPerSecond,
-		width,
-		height)
-	mencoderResultQueue.put(result)
 
 def RunDocTests():
 	numFailures, numTests = doctest.testmod()
