@@ -7,6 +7,7 @@ import os
 import sys
 
 USE_CONSOLE = False
+VERSION = '0.1'
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
@@ -16,8 +17,8 @@ if not USE_CONSOLE and sys.platform == "win32":
 sys.path.append(os.path.realpath('Source'))
 
 cx_Freeze.setup(
-	name = 'CreateTimeLapse',
-	version = '0.1',
+	name = 'TimeLapse',
+	version = VERSION,
 	description = 'Creates a movie from a series of images.',
 	url = 'https://github.com/harrisont/TimeLapse',
 	options = {
@@ -42,6 +43,7 @@ cx_Freeze.setup(
 	executables = [
 		cx_Freeze.Executable(
 			script = 'Source/CreateTimeLapse.py',
+			targetName = 'TimeLapse.exe',
 			base = base,
 			icon = None,
 			copyDependentFiles = True,
