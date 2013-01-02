@@ -5,6 +5,7 @@ which is in the MPlayer (http://www.mplayerhq.hu/design7/news.html) suite.
 MPlayer/MEncoder man page: http://tivo-mplayer.sourceforge.net/docs/mplayer-man.html.
 """
 
+import Directories
 import ImageHelper
 import Log
 import PlatformHelper
@@ -12,12 +13,6 @@ import PlatformHelper
 import doctest
 import os
 import sys
-
-# The BUILD_CONSTANTS module only exists when using cx_Freeze.
-try:
-	import BUILD_CONSTANTS
-except ImportError:
-	pass
 
 def CreateMovieFromImages(imageFileNames, framesPerSecond, width=None, height=None):
 	"""imageFileNames should be a list of images whose length is at least 1.
@@ -97,22 +92,8 @@ def _RunMencoderCommand(mencoderArgs):
 
 	return exitStatus
 
-def _GetRootDirectory():
-	try:
-		rootRelativePath = BUILD_CONSTANTS.rootRelativePath
-	except NameError:
-		# This file is assumed to be under '<root>/Source/', so we need to go up one level.
-		rootRelativePath = os.path.pardir
-
-	return os.path.realpath(os.path.join(
-		os.path.dirname(__file__),
-		rootRelativePath))
-
-def _GetExternalDirectory():
-	return os.path.join(_GetRootDirectory(), 'External')
-
 def _GetMplayerDirectory():
-	return os.path.join(_GetExternalDirectory(), 'mplayer')
+	return os.path.join(Directories.GetExternalDirectory(), 'mplayer')
 
 def _GetMencoderPath():
 	return os.path.join(_GetMencoderDirectory(), _GetMencoderFile())
