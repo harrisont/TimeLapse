@@ -6,7 +6,7 @@ import cx_Freeze
 import os
 import sys
 
-USE_CONSOLE = True
+USE_CONSOLE = False
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
