@@ -7,7 +7,7 @@ MPlayer/MEncoder man page: http://tivo-mplayer.sourceforge.net/docs/mplayer-man.
 
 import ImageHelper
 import Log
-import Platform
+import PlatformHelper
 
 import doctest
 import os
@@ -95,10 +95,10 @@ def _GetMencoderPath():
 	return os.path.join(_GetMencoderDirectory(), _GetMencoderFile())
 
 def _GetMencoderDirectory():
-	platform = Platform.GetPlatform()
-	if platform == Platform.Platforms.mac:
+	platform = PlatformHelper.GetPlatform()
+	if platform == PlatformHelper.Platforms.mac:
 		platformSpecificMplayerDirectory = 'Mac'
-	elif platform == Platform.Platforms.windows:
+	elif platform == PlatformHelper.Platforms.windows:
 		platformSpecificMplayerDirectory = 'Windows'
 	else:
 	 	raise ValueError("Unknown platform.")
@@ -112,8 +112,8 @@ def _GetMencoderDirectory():
 		platformSpecificMplayerDirectory))
 
 def _GetMencoderFile():
-	platform = Platform.GetPlatform()
-	if platform == Platform.Platforms.windows:
+	platform = PlatformHelper.GetPlatform()
+	if platform == PlatformHelper.Platforms.windows:
 		return "mencoder.exe"
 	else:
 		return "mencoder"

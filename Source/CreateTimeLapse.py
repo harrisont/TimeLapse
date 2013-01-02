@@ -5,7 +5,7 @@
 import ImageHelper
 import Log
 import Mencoder
-import Platform
+import PlatformHelper
 import TkinterWidgets
 
 import doctest
@@ -149,8 +149,8 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		"""The file picker returns different types on different platforms.
 		This handles each one.
 		"""
-		platform = Platform.GetPlatform()
-		if platform == Platform.Platforms.windows:
+		platform = PlatformHelper.GetPlatform()
+		if platform == PlatformHelper.Platforms.windows:
 			# Windows returns a single string for the file list.
 			return self.window.tk.splitlist(files)
 		else:
