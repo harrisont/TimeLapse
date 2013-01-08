@@ -67,6 +67,13 @@ class LabelledEntryControl(tk.Frame):
 	def IsEmpty(self):
 		return len(self.GetText()) == 0
 
+	def ClearText(self):
+		self.entry.delete(0, tk.END)
+
+	def SetText(self, text):
+		self.ClearText()
+		self.entry.insert(0, text)
+
 class WidthAndHeightControl(tk.Frame):
 	"""A frame with two LabelledEntryControl's for width and height."""
 
@@ -84,6 +91,18 @@ class WidthAndHeightControl(tk.Frame):
 
 	def GetHeight(self):
 		return self.heightControl.GetText()
+
+	def GetWidthAndHeight(self):
+		return self.GetWidth(), self.GetHeight()
+
+	def SetWidth(self, width):
+		return self.widthControl.SetText(width)
+
+	def SetHeight(self, height):
+		return self.heightControl.SetText(height)
+
+	def SetWidthAndHeight(self, width, height):
+		return self.SetWidth(width), self.SetHeight(height)
 
 	def IsValid(self):
 		bothEmpty = self.widthControl.IsEmpty() and self.heightControl.IsEmpty()

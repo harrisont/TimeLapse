@@ -171,12 +171,15 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 		if len(imageFileNames) > 0:
 			createMovieButtonState = tkinter.NORMAL
+
+			contentType, width, height = ImageHelper.GetImageInfoFromImage(imageFileNames[0])
+			self.widthAndHeightControl.SetWidthAndHeight(width, height)
 		else:
 			createMovieButtonState = tkinter.DISABLED
 		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
 	def GetScaledResolution(self):
-		return self.widthAndHeightControl.GetWidth(), self.widthAndHeightControl.GetHeight()
+		return self.widthAndHeightControl.GetWidthAndHeight()
 
 	def ValidateScaledResolution(self):
 		if self.widthAndHeightControl.IsValid():
