@@ -119,6 +119,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 	def InitImageScaleControl(self):
 		self.ImageScaleControl = TkinterWidgets.ImageScaleControl(self)
+		self.ImageScaleControl.Disable()
 		self.ImageScaleControl.pack(pady=(0,4))
 
 	def SetStatusLabel(self, text):
@@ -172,7 +173,9 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.imagesListControl.insert(0, *imageFileNames)
 
 		if len(imageFileNames) > 0:
+			# Enable controls that are dependent on having selected images.
 			createMovieButtonState = tkinter.NORMAL
+			self.ImageScaleControl.Enable()
 
 			contentType, width, height = ImageHelper.GetImageInfoFromImage(imageFileNames[0])
 			self.ImageScaleControl.SetWidthAndHeight(width, height)
