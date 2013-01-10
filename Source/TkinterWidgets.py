@@ -1,10 +1,11 @@
 import doctest
 import tkinter as tk
+from tkinter import ttk
 
-class IntegerEntry(tk.Entry):
+class IntegerEntry(ttk.Entry):
 	"""Overrides Entry to validate that the text is an integer."""
 	def __init__(self, parent, **keywordArgs):
-		tk.Entry.__init__(self, parent, keywordArgs)
+		ttk.Entry.__init__(self, parent, keywordArgs)
 
 		isValidCommand = self.register(IntegerEntry._IsValidStatic)
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
@@ -43,20 +44,20 @@ class IntegerEntry(tk.Entry):
 	def IsValid(self):
 		return IntegerEntry._IsValidStatic(self.get())
 
-class LabelledEntryControl(tk.Frame):
+class LabelledEntryControl(ttk.Frame):
 	"""A frame with a label and an entry to the right of it."""
 
 	def __init__(self, parent, labelText, **keywordArgs):
 		"""Uses Tkinter.Entry by default.  Pass in a value for 'entryClass' to use a differnt entry class."""
 
-		entryClass = tk.Entry
+		entryClass = ttk.Entry
 		if 'entryClass' in keywordArgs:
 			entryClass = keywordArgs['entryClass']
 			del keywordArgs['entryClass']
 
-		tk.Frame.__init__(self, parent, keywordArgs)
+		ttk.Frame.__init__(self, parent, **keywordArgs)
 
-		tk.Label(self, text=labelText).pack(side=tk.LEFT)
+		ttk.Label(self, text=labelText).pack(side=tk.LEFT)
 
 		self.entry = entryClass(self)
 		self.entry.pack()
@@ -68,7 +69,7 @@ class LabelledEntryControl(tk.Frame):
 		return len(self.GetText()) == 0
 
 	def ClearText(self):
-		self.entry.delete(0, tk.END)
+		self.entry.delete(0, ttk.END)
 
 	def SetText(self, text):
 		self.ClearText()
@@ -78,7 +79,7 @@ class ImageScaleControl(ttk.Frame):
 	"""A frame with two LabelledEntryControl's for width and height."""
 
 	def __init__(self, parent, **keywordArgs):
-		tk.Frame.__init__(self, parent, keywordArgs)
+		ttk.Frame.__init__(self, parent, **keywordArgs)
 
 		self.widthControl = LabelledEntryControl(self, 'Width', entryClass=IntegerEntry)
 		self.widthControl.pack()
