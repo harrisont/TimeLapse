@@ -74,7 +74,7 @@ class LabelledEntryControl(tk.Frame):
 		self.ClearText()
 		self.entry.insert(0, text)
 
-class WidthAndHeightControl(tk.Frame):
+class ImageScaleControl(ttk.Frame):
 	"""A frame with two LabelledEntryControl's for width and height."""
 
 	def __init__(self, parent, **keywordArgs):
