@@ -69,7 +69,7 @@ class LabelledEntryControl(ttk.Frame):
 		return len(self.GetText()) == 0
 
 	def ClearText(self):
-		self.entry.delete(0, ttk.END)
+		self.entry.delete(0, tk.END)
 
 	def SetText(self, text):
 		self.ClearText()
@@ -135,7 +135,8 @@ class ImageScaleControl(ttk.LabelFrame):
 		self.heightControl.SetText(height)
 
 	def SetWidthAndHeight(self, width, height):
-		return self.SetWidth(width), self.SetHeight(height)
+		self.SetWidth(width)
+		self.SetHeight(height)
 
 	def IsValid(self):
 		bothEmpty = self.widthControl.IsEmpty() and self.heightControl.IsEmpty()
