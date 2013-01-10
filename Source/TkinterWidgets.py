@@ -116,9 +116,6 @@ class ImageScaleControl(ttk.LabelFrame):
 	def GetAspectRatio(self):
 		return self.aspectRatio
 
-	def SetAspectRatio(self, aspectRatio):
-		self.aspectRatio = aspectRatio
-
 	def GetWidth(self):
 		return self.widthControl.GetText()
 
@@ -129,14 +126,31 @@ class ImageScaleControl(ttk.LabelFrame):
 		return self.GetWidth(), self.GetHeight()
 
 	def SetWidth(self, width):
-		self.widthControl.SetText(width)
+		self._SetWidthWithNoAspectRatioCorrection(width)
+		if self.GetKeepAspectRatio():
+			self._SetAspectRatioCorrectedHeight()
 
 	def SetHeight(self, height):
-		self.heightControl.SetText(height)
+		self._SetHeightWithNoAspectRatioCorrection(height)
+		if self.GetKeepAspectRatio():
+			self._SetAspectRatioCorrectedWidth(height)
 
 	def SetWidthAndHeight(self, width, height):
-		self.SetWidth(width)
-		self.SetHeight(height)
+		self.aspectRatio = width / height
+		self._SetWidthWithNoAspectRatioCorrection(width)
+		self._SetHeightWithNoAspectRatioCorrection(height)
+
+	def _SetWidthWithNoAspectRatioCorrection(self, width):
+		self.widthControl.SetText(width)
+
+	def _SetHeightWithNoAspectRatioCorrection(self, height):
+		self.heightControl.SetText(height)
+
+	def _SetAspectRatioCorrectedWidth(self, height):
+		self._SetHeightWithNoAspectRatioCorrection(height * self.GetAspectRatio())
+
+	def _SetAspectRatioCorrectedHeight(self, width):
+		self._SetWidthWithNoAspectRatioCorrection(width / self.GetAspectRatio())
 
 	def IsValid(self):
 		bothEmpty = self.widthControl.IsEmpty() and self.heightControl.IsEmpty()
