@@ -24,8 +24,7 @@ Log.logLevel = Log.LogLevel.verbose
 class TimeLapseVideoFromImagesDialog(ttk.Frame):
 	def __init__(self, window):
 		ttk.Style().configure('Toplevel.TFrame', padx=5, pady=5)
-		ttk.Frame.__init__(
-			self,
+		super().__init__(
 			window,
 			style='Toplevel.TFrame')
 
@@ -120,7 +119,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 	def InitImageScaleControl(self):
 		self.ImageScaleControl = TkinterWidgets.ImageScaleControl(self)
-		self.ImageScaleControl.pack(pady=4)
+		self.ImageScaleControl.pack(pady=(0,4))
 
 	def SetStatusLabel(self, text):
 		self.statusLabel.config(text=text)

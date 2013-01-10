@@ -5,7 +5,7 @@ from tkinter import ttk
 class IntegerEntry(ttk.Entry):
 	"""Overrides Entry to validate that the text is an integer."""
 	def __init__(self, parent, **keywordArgs):
-		ttk.Entry.__init__(self, parent, keywordArgs)
+		super().__init__(parent, keywordArgs)
 
 		isValidCommand = self.register(IntegerEntry._IsValidStatic)
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
@@ -55,12 +55,12 @@ class LabelledEntryControl(ttk.Frame):
 			entryClass = keywordArgs['entryClass']
 			del keywordArgs['entryClass']
 
-		ttk.Frame.__init__(self, parent, **keywordArgs)
+		super().__init__(parent, **keywordArgs)
 
 		ttk.Label(self, text=labelText).pack(side=tk.LEFT)
 
 		self.entry = entryClass(self)
-		self.entry.pack()
+		self.entry.pack(side=tk.RIGHT)
 
 	def GetText(self):
 		return self.entry.get()
@@ -75,17 +75,49 @@ class LabelledEntryControl(ttk.Frame):
 		self.ClearText()
 		self.entry.insert(0, text)
 
-class ImageScaleControl(ttk.Frame):
+class CheckboxControl(ttk.Checkbutton):
+	"""Convenience wrapper around ttk.Checkbutton."""
+
+	def __init__(self, parent, text, **keywordArgs):
+		self.checkboxValueVar = tk.IntVar()
+
+		super().__init__(
+			parent,
+			variable=self.checkboxValueVar,
+			text=text,
+			**keywordArgs)
+		self.invoke()
+
+	def IsChecked(self):
+		return self.checkboxValueVar.get()
+
+class ImageScaleControl(ttk.LabelFrame):
 	"""A frame with two LabelledEntryControl's for width and height."""
 
 	def __init__(self, parent, **keywordArgs):
-		ttk.Frame.__init__(self, parent, **keywordArgs)
+		super().__init__(parent, text='Image Size', **keywordArgs)
 
-		self.widthControl = LabelledEntryControl(self, 'Width', entryClass=IntegerEntry)
-		self.widthControl.pack()
+		frame = ttk.Frame(self)
 
-		self.heightControl = LabelledEntryControl(self, 'Height', entryClass=IntegerEntry)
-		self.heightControl.pack()
+		self.keepAspectRatioControl = CheckboxControl(frame, 'Maintain Aspect Ratio')
+		self.keepAspectRatioControl.pack()
+
+		self.widthControl = LabelledEntryControl(frame, 'Width', entryClass=IntegerEntry)
+		self.widthControl.pack(fill=tk.X, padx=4, pady=1)
+
+		self.heightControl = LabelledEntryControl(frame, 'Height', entryClass=IntegerEntry)
+		self.heightControl.pack(fill=tk.X, padx=4, pady=1)
+
+		frame.pack(pady=(0,4))
+
+	def GetKeepAspectRatio(self):
+		return self.keepAspectRatioControl.IsChecked()
+
+	def GetAspectRatio(self):
+		return self.aspectRatio
+
+	def SetAspectRatio(self, aspectRatio):
+		self.aspectRatio = aspectRatio
 
 	def GetWidth(self):
 		return self.widthControl.GetText()
@@ -97,10 +129,10 @@ class ImageScaleControl(ttk.Frame):
 		return self.GetWidth(), self.GetHeight()
 
 	def SetWidth(self, width):
-		return self.widthControl.SetText(width)
+		self.widthControl.SetText(width)
 
 	def SetHeight(self, height):
-		return self.heightControl.SetText(height)
+		self.heightControl.SetText(height)
 
 	def SetWidthAndHeight(self, width, height):
 		return self.SetWidth(width), self.SetHeight(height)
