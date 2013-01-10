@@ -23,11 +23,13 @@ Log.logLevel = Log.LogLevel.verbose
 
 class TimeLapseVideoFromImagesDialog(ttk.Frame):
 	def __init__(self, window):
-		ttk.Style().configure('TFrame', padx=5, pady=5)
+		ttk.Style().configure('Toplevel.TFrame', padx=5, pady=5)
 		ttk.Frame.__init__(
 			self,
 			window,
-			style='TFrame')
+			style='Toplevel.TFrame')
+
+		ttk.Style().configure('TButton', padx=5, pady=5)
 
 		window.wm_title("TimeLapse")
 		window.iconbitmap(default=os.path.join(Directories.GetResourcesDirectory(), 'radian.ico'))
@@ -43,23 +45,23 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.InitStatusControl()
 
 	def InitSelectImagesButton(self):
-		ttk.Style().configure('TButton', padx=5, pady=5)
 		ttk.Button(
 			self,
 			text='Select Images',
 			command=self.SelectImages,
 			style='TButton'
-			).pack(fill=tkinter.constants.BOTH)
+			).pack(fill=tkinter.X)
 
 	def InitCreateMovieFromImagesButton(self):
-		ttk.Style().configure('TButton', padx=5, pady=5)
 		self.createMovieFromImagesButton = ttk.Button(
 			self,
 			text='Create Video From Images',
 			command=self.CreateMovieFromImages,
 			state=tkinter.DISABLED,
 			style='TButton')
-		self.createMovieFromImagesButton.pack(fill=tkinter.constants.BOTH)
+		self.createMovieFromImagesButton.pack(
+			fill=tkinter.X,
+			pady=4)
 
 	def InitImagesListControl(self):
 		# Setup a list-box and scrollbars for it.
@@ -69,8 +71,6 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			self,
 			borderwidth=2,
 			relief=tkinter.SUNKEN)
-		frame.grid_rowconfigure(0, weight=1)
-		frame.grid_columnconfigure(0, weight=1)
 
 		scrollbarY = ttk.Scrollbar(frame)
 		scrollbarX = ttk.Scrollbar(frame, orient=tkinter.HORIZONTAL)
@@ -80,16 +80,19 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.imagesListControl = tkinter.Listbox(
 			frame,
 			borderwidth=0,
-			width=100,
-			height=10,
+			width=80,
+			height=6,
 			yscrollcommand=scrollbarY.set,
 			xscrollcommand=scrollbarX.set)
-		self.imagesListControl.pack()
+		self.imagesListControl.pack(fill=tkinter.BOTH, expand=True)
 
 		scrollbarY.config(command=self.imagesListControl.yview)
 		scrollbarX.config(command=self.imagesListControl.xview)
 
-		frame.pack()
+		frame.pack(
+			fill=tkinter.BOTH,
+			expand=True,
+			pady=(0,4))
 
 	def InitFramesRateControl(self):
 		frame = ttk.Frame(self)
@@ -109,15 +112,19 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			width=4)
 		self.framesPerSecondControl.pack()
 
-		frame.pack()
+		frame.pack(pady=4)
 
 	def InitStatusControl(self):
 		self.statusLabel = ttk.Label(self)
 		self.statusLabel.pack()
 
 	def InitImageScaleControl(self):
-		self.widthAndHeightControl = TkinterWidgets.WidthAndHeightControl(self)
+		frame = ttk.Frame(self)
+
+		self.widthAndHeightControl = TkinterWidgets.WidthAndHeightControl(frame)
 		self.widthAndHeightControl.pack()
+
+		frame.pack(pady=4)
 
 	def SetStatusLabel(self, text):
 		self.statusLabel.config(text=text)
@@ -269,7 +276,18 @@ def main():
 		return
 
 	window = tkinter.Tk()
-	TimeLapseVideoFromImagesDialog(window).pack()
+	TimeLapseVideoFromImagesDialog(window).pack(
+		fill=tkinter.BOTH,
+		expand=True,
+		padx=2,
+		pady=2)
+
+	# Update the window so that it calculates the size,
+	# then use it to set the minimum size to prevent distortions
+	# when users resize the window very small.
+	window.update()
+	window.minsize(window.winfo_width(), window.winfo_height())
+
 	window.mainloop()
 
 if __name__=='__main__':
