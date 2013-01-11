@@ -24,6 +24,9 @@ class Entry(ttk.Entry):
 	def __init__(self, parent, **keywordArgs):
 		super().__init__(parent, **keywordArgs)
 
+		# Bind Control-a to select-all (the default is Control-/).
+		self.bind('<Control-a>', self.HandleSelectAllEvent)
+
 		isValidCommand = self.register(self._IsTextValid)
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
 
@@ -45,6 +48,11 @@ class Entry(ttk.Entry):
 
 	def Enable(self):
 		self.state(['!disabled'])
+
+	@staticmethod
+	def HandleSelectAllEvent(event):
+		event.widget.select_range(0, tk.END)
+		return 'break'
 
 	def _IsTextValid(self, text):
 		return True
