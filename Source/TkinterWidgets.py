@@ -302,7 +302,7 @@ class ImageScaleControl(ttk.LabelFrame):
 		try:
 			height = self.GetHeight()
 		except ValueError:
-			# Do nothing if the height is not set
+			self.widthControl.ClearText()
 			return
 		self._SetWidthWithNoAspectRatioCorrection(height * self.GetAspectRatio())
 
@@ -310,7 +310,7 @@ class ImageScaleControl(ttk.LabelFrame):
 		try:
 			width = self.GetWidth()
 		except ValueError:
-			# Do nothing if the width is not set
+			self.heightControl.ClearText()
 			return
 		self._SetHeightWithNoAspectRatioCorrection(width / self.GetAspectRatio())
 
