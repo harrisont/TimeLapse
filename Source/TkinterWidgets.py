@@ -7,7 +7,7 @@ from tkinter import ttk
 class IntegerEntry(ttk.Entry):
 	"""Overrides Entry to validate that the text is an integer."""
 	def __init__(self, parent, **keywordArgs):
-		super().__init__(parent, keywordArgs)
+		super().__init__(parent, **keywordArgs)
 
 		isValidCommand = self.register(self._IsTextValid)
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
