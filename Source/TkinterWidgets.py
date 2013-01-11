@@ -22,7 +22,12 @@ class Entry(ttk.Entry):
 	Subclasses can override _IsTextValid to provide their own validation.
 	"""
 	def __init__(self, parent, **keywordArgs):
-		super().__init__(parent, **keywordArgs)
+		self.textVar = tk.StringVar()
+
+		super().__init__(
+			parent,
+			textvariable=self.textVar,
+			**keywordArgs)
 
 		# Bind Control-a to select-all (the default is Control-/).
 		self.bind('<Control-a>', self.HandleSelectAllEvent)
@@ -31,17 +36,16 @@ class Entry(ttk.Entry):
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
 
 	def GetText(self):
-		return self.get()
+		return self.textVar.get()
 
 	def IsEmpty(self):
 		return len(self.GetText()) == 0
 
 	def ClearText(self):
-		self.delete(0, tk.END)
+		self.SetText('')
 
 	def SetText(self, text):
-		self.ClearText()
-		self.insert(0, text)
+		self.textVar.set(text)
 
 	def Disable(self):
 		self.state(['disabled'])
