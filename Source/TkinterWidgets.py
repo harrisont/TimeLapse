@@ -17,10 +17,15 @@ class Label(ttk.Label):
 		self.state(['!disabled'])
 
 class Entry(ttk.Entry):
-	"""Overrides ttk.Entry to provide convenience methods."""
+	"""Overrides ttk.Entry to provide convenience methods.
 
+	Subclasses can override _IsTextValid to provide their own validation.
+	"""
 	def __init__(self, parent, **keywordArgs):
 		super().__init__(parent, **keywordArgs)
+
+		isValidCommand = self.register(self._IsTextValid)
+		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
 
 	def GetText(self):
 		return self.get()
@@ -41,42 +46,39 @@ class Entry(ttk.Entry):
 	def Enable(self):
 		self.state(['!disabled'])
 
+	def _IsTextValid(self, text):
+		return True
+
 class IntegerEntry(Entry):
 	"""Overrides Entry to validate that the text is an integer."""
 	def __init__(self, parent, **keywordArgs):
 		super().__init__(parent, **keywordArgs)
 
-		isValidCommand = self.register(self._IsTextValid)
-		self.config(validate='all', validatecommand=(isValidCommand, '%s', '%P'))
-
 	def IsValid(self):
 		return self._IsTextValid(self.get())
 
-	def _IsTextValid(self, oldText, newText):
-		return self._IsTextValidStatic(newText)
-
 	@staticmethod
-	def _IsTextValidStatic(text):
+	def _IsTextValid(text):
 		"""
-		>>> IntegerEntry._IsTextValidStatic('123')
+		>>> IntegerEntry._IsTextValid('123')
 		True
 
-		>>> IntegerEntry._IsTextValidStatic('')
+		>>> IntegerEntry._IsTextValid('')
 		True
 
-		>>> IntegerEntry._IsTextValidStatic('1.5')
+		>>> IntegerEntry._IsTextValid('1.5')
 		False
 
-		>>> IntegerEntry._IsTextValidStatic('-2')
+		>>> IntegerEntry._IsTextValid('-2')
 		True
 
-		>>> IntegerEntry._IsTextValidStatic(' ')
+		>>> IntegerEntry._IsTextValid(' ')
 		False
 
-		>>> IntegerEntry._IsTextValidStatic('a')
+		>>> IntegerEntry._IsTextValid('a')
 		False
 
-		>>> IntegerEntry._IsTextValidStatic('1a')
+		>>> IntegerEntry._IsTextValid('1a')
 		False
 		"""
 		try:
