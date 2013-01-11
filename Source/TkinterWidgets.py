@@ -47,32 +47,36 @@ class IntegerEntry(Entry):
 		super().__init__(parent, **keywordArgs)
 
 		isValidCommand = self.register(self._IsTextValid)
-		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
+		self.config(validate='all', validatecommand=(isValidCommand, '%s', '%P'))
 
 	def IsValid(self):
 		return self._IsTextValid(self.get())
 
-	def _IsTextValid(self, text):
+	def _IsTextValid(self, oldText, newText):
+		return self._IsTextValidStatic(newText)
+
+	@staticmethod
+	def _IsTextValidStatic(text):
 		"""
-		>>> IntegerEntry._IsValidStatic('123')
+		>>> IntegerEntry._IsTextValidStatic('123')
 		True
 
-		>>> IntegerEntry._IsValidStatic('')
+		>>> IntegerEntry._IsTextValidStatic('')
 		True
 
-		>>> IntegerEntry._IsValidStatic('1.5')
+		>>> IntegerEntry._IsTextValidStatic('1.5')
 		False
 
-		>>> IntegerEntry._IsValidStatic('-2')
+		>>> IntegerEntry._IsTextValidStatic('-2')
 		True
 
-		>>> IntegerEntry._IsValidStatic(' ')
+		>>> IntegerEntry._IsTextValidStatic(' ')
 		False
 
-		>>> IntegerEntry._IsValidStatic('a')
+		>>> IntegerEntry._IsTextValidStatic('a')
 		False
 
-		>>> IntegerEntry._IsValidStatic('1a')
+		>>> IntegerEntry._IsTextValidStatic('1a')
 		False
 		"""
 		try:
