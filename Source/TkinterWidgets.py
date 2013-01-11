@@ -146,18 +146,18 @@ class LabelledEntryControl(ttk.Frame):
 		if self.IsEntryEnabled():
 			self.entry.SetText(text)
 		else:
-			self._EnableEntryHelper()
+			self.entry.Enable()
 			self.entry.SetText(text)
-			self._DisableEntryHelper()
+			self.entry.Disable()
 
 	def Disable(self):
 		self.DisableLabel()
-		self._DisableEntryHelper()
+		self.entry.Disable()
 
 	def Enable(self):
 		self.EnableLabel()
 		if self.enableEntryWhenControlEnabled:
-			self._EnableEntryHelper()
+			self.entry.Enable()
 
 	def IsEntryEnabled(self):
 		return self.entry.instate(['!disabled'])
