@@ -114,12 +114,22 @@ class LabelledEntryControl(ttk.Frame):
 			entryClass = keywordArgs['entryClass']
 			del keywordArgs['entryClass']
 
+		labelKeywordArgs = {}
+		if 'labelArgs' in keywordArgs:
+			labelKeywordArgs = keywordArgs['labelArgs']
+			del keywordArgs['labelArgs']
+
+		entryKeywordArgs = {}
+		if 'entryArgs' in keywordArgs:
+			entryKeywordArgs = keywordArgs['entryArgs']
+			del keywordArgs['entryArgs']
+
 		super().__init__(parent, **keywordArgs)
 
-		self.label = Label(self, text=labelText)
+		self.label = Label(self, text=labelText, **labelKeywordArgs)
 		self.label.pack(side=tk.LEFT)
 
-		self.entry = entryClass(self)
+		self.entry = entryClass(self, **entryKeywordArgs)
 		self.entry.pack(side=tk.RIGHT)
 
 	def GetText(self):
