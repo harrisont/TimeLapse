@@ -9,11 +9,13 @@ class IntegerEntry(ttk.Entry):
 	def __init__(self, parent, **keywordArgs):
 		super().__init__(parent, keywordArgs)
 
-		isValidCommand = self.register(IntegerEntry._IsValidStatic)
+		isValidCommand = self.register(self._IsTextValid)
 		self.config(validate='all', validatecommand=(isValidCommand, '%P'))
 
-	@staticmethod
-	def _IsValidStatic(text):
+	def IsValid(self):
+		return self._IsTextValid(self.get())
+
+	def _IsTextValid(self, text):
 		"""
 		>>> IntegerEntry._IsValidStatic('123')
 		True
@@ -43,9 +45,6 @@ class IntegerEntry(ttk.Entry):
 		except ValueError:
 			Log.Log(Log.LogLevel.verbose, 'Invalid text entry "{}"'.format(text))
 			return False
-
-	def IsValid(self):
-		return IntegerEntry._IsValidStatic(self.get())
 
 class LabelledEntryControl(ttk.Frame):
 	"""A frame with a label and an entry to the right of it."""
