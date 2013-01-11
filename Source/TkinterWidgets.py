@@ -19,10 +19,19 @@ class Label(ttk.Label):
 class Entry(ttk.Entry):
 	"""Overrides ttk.Entry to provide convenience methods.
 
+	If the optional keyword argument 'changedCommand' is set to a function,
+	that function will be called whenever the entry's value changes.
+
 	Subclasses can override _IsTextValid to provide their own validation.
 	"""
 	def __init__(self, parent, **keywordArgs):
 		self.textVar = tk.StringVar()
+
+		# If changedCommand exists, call it on changes, ignoring the default trace parameters.
+		if 'changedCommand' in keywordArgs:
+			command = keywordArgs['changedCommand']
+			self.textVar.trace('w',	lambda varName, index, operation: command())
+			del keywordArgs['changedCommand']
 
 		super().__init__(
 			parent,
@@ -240,10 +249,17 @@ class ImageScaleControl(ttk.LabelFrame):
 			command=self._ChangedKeepAspectRatio)
 		self.keepAspectRatioControl.pack()
 
-		self.widthControl = LabelledEntryControl(frame, 'Width', entryClass=IntegerEntry)
+		self.widthControl = LabelledEntryControl(
+			frame,
+			'Width',
+			entryClass=IntegerEntry,
+			entryArgs={'changedCommand': self._ChangedWidth})
 		self.widthControl.pack(fill=tk.X, padx=4, pady=1)
 
-		self.heightControl = LabelledEntryControl(frame, 'Height', entryClass=IntegerEntry)
+		self.heightControl = LabelledEntryControl(
+			frame,
+			'Height',
+			entryClass=IntegerEntry)
 		self.heightControl.pack(fill=tk.X, padx=4, pady=1)
 
 		self.SetKeepAspectRatio(True)
@@ -264,6 +280,10 @@ class ImageScaleControl(ttk.LabelFrame):
 			self.heightControl.DisableEntry()
 		else:
 			self.heightControl.EnableEntry()
+
+	def _ChangedWidth(self):
+		if self.GetKeepAspectRatio():
+			self._SetHeightFromAspectRatioCorrectedWidth()
 
 	def GetAspectRatio(self):
 		return self.aspectRatio
