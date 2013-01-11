@@ -4,7 +4,44 @@ import doctest
 import tkinter as tk
 from tkinter import ttk
 
-class IntegerEntry(ttk.Entry):
+class Label(ttk.Label):
+	"""Overrides ttk.Label to provide convenience methods."""
+
+	def __init__(self, parent, **keywordArgs):
+		super().__init__(parent, **keywordArgs)
+
+	def Disable(self):
+		self.state(['disabled'])
+
+	def Enable(self):
+		self.state(['!disabled'])
+
+class Entry(ttk.Entry):
+	"""Overrides ttk.Entry to provide convenience methods."""
+
+	def __init__(self, parent, **keywordArgs):
+		super().__init__(parent, **keywordArgs)
+
+	def GetText(self):
+		return self.get()
+
+	def IsEmpty(self):
+		return len(self.GetText()) == 0
+
+	def ClearText(self):
+		self.delete(0, tk.END)
+
+	def SetText(self, text):
+		self.ClearText()
+		self.insert(0, text)
+
+	def Disable(self):
+		self.state(['disabled'])
+
+	def Enable(self):
+		self.state(['!disabled'])
+
+class IntegerEntry(Entry):
 	"""Overrides Entry to validate that the text is an integer."""
 	def __init__(self, parent, **keywordArgs):
 		super().__init__(parent, **keywordArgs)
@@ -54,40 +91,36 @@ class LabelledEntryControl(ttk.Frame):
 
 		self.enableEntryWhenControlEnabled = True
 
-		entryClass = ttk.Entry
+		entryClass = Entry
 		if 'entryClass' in keywordArgs:
 			entryClass = keywordArgs['entryClass']
 			del keywordArgs['entryClass']
 
 		super().__init__(parent, **keywordArgs)
 
-		self.label = ttk.Label(self, text=labelText)
+		self.label = Label(self, text=labelText)
 		self.label.pack(side=tk.LEFT)
 
 		self.entry = entryClass(self)
 		self.entry.pack(side=tk.RIGHT)
 
 	def GetText(self):
-		return self.entry.get()
+		return self.entry.GetText()
 
 	def IsEmpty(self):
-		return len(self.GetText()) == 0
+		return self.entry.IsEmpty()
 
 	def ClearText(self):
-		self.entry.delete(0, tk.END)
+		self.entry.ClearText()
 
 	def SetText(self, text):
 		# Text can only be set when the entry is enabled.
 		if self.IsEntryEnabled():
-			self._SetTextHelper(text)
+			self.entry.SetText(text)
 		else:
 			self._EnableEntryHelper()
-			self._SetTextHelper(text)
+			self.entry.SetText(text)
 			self._DisableEntryHelper()
-
-	def _SetTextHelper(self, text):
-		self.ClearText()
-		self.entry.insert(0, text)
 
 	def Disable(self):
 		self.DisableLabel()
@@ -103,23 +136,17 @@ class LabelledEntryControl(ttk.Frame):
 
 	def DisableEntry(self):
 		self.enableEntryWhenControlEnabled = False
-		self._DisableEntryHelper()
-
-	def _DisableEntryHelper(self):
-		self.entry.state(['disabled'])
+		self.entry.Disable()
 
 	def EnableEntry(self):
 		self.enableEntryWhenControlEnabled = True
-		self._EnableEntryHelper()
-
-	def _EnableEntryHelper(self):
-		self.entry.state(['!disabled'])
+		self.entry.Enable()
 
 	def DisableLabel(self):
-		self.label.state(['disabled'])
+		self.label.Disable()
 
 	def EnableLabel(self):
-		self.label.state(['!disabled'])
+		self.label.Enable()
 
 class CheckboxControl(ttk.Checkbutton):
 	"""Convenience wrapper around ttk.Checkbutton."""
@@ -151,7 +178,17 @@ class CheckboxControl(ttk.Checkbutton):
 		return self.checkboxValueVar.get() == 1
 
 	def Check(self):
-		self.checkboxValueVar.set(1)
+		self.SetChecked(True)
+
+	def Uncheck(self):
+		self.SetChecked(False)
+
+	def SetChecked(self, isChecked):
+		if isChecked:
+			value = 1
+		else:
+			value = 0
+		self.checkboxValueVar.set(value)
 
 	def Disable(self):
 		self.state(['disabled'])
@@ -181,12 +218,17 @@ class ImageScaleControl(ttk.LabelFrame):
 		self.heightControl = LabelledEntryControl(frame, 'Height', entryClass=IntegerEntry)
 		self.heightControl.pack(fill=tk.X, padx=4, pady=1)
 
-		self.keepAspectRatioControl.Check()
+		self.SetKeepAspectRatio(True)
+		# The checked-event doesn't trigger while initializing, so trigger it manually.
+		self._ChangedKeepAspectRatio()
 
 		frame.pack(pady=(0,4))
 
 	def GetKeepAspectRatio(self):
 		return self.keepAspectRatioControl.IsChecked()
+
+	def SetKeepAspectRatio(self, shouldKeepAspectRatio):
+		self.keepAspectRatioControl.SetChecked(shouldKeepAspectRatio)
 
 	def _ChangedKeepAspectRatio(self):
 		if self.GetKeepAspectRatio():
