@@ -118,9 +118,9 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.statusLabel.pack()
 
 	def InitImageScaleControl(self):
-		self.ImageScaleControl = TkinterWidgets.ImageScaleControl(self)
-		self.ImageScaleControl.Disable()
-		self.ImageScaleControl.pack(pady=(0,4))
+		self.imageScaleControl = TkinterWidgets.ImageScaleControl(self)
+		self.imageScaleControl.Disable()
+		self.imageScaleControl.pack(pady=(0,4))
 
 	def SetStatusLabel(self, text):
 		self.statusLabel.config(text=text)
@@ -175,19 +175,19 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		if len(imageFileNames) > 0:
 			# Enable controls that are dependent on having selected images.
 			createMovieButtonState = tkinter.NORMAL
-			self.ImageScaleControl.Enable()
+			self.imageScaleControl.Enable()
 
 			contentType, width, height = ImageHelper.GetImageInfoFromImage(imageFileNames[0])
-			self.ImageScaleControl.SetWidthAndHeight(width, height)
+			self.imageScaleControl.SetWidthAndHeight(width, height)
 		else:
 			createMovieButtonState = tkinter.DISABLED
 		self.createMovieFromImagesButton.config(state=createMovieButtonState)
 
 	def GetScaledResolution(self):
-		return self.ImageScaleControl.GetWidthAndHeight()
+		return self.imageScaleControl.GetWidthAndHeight()
 
 	def ValidateScaledResolution(self):
-		if self.ImageScaleControl.IsValid():
+		if self.imageScaleControl.IsValid():
 			return True
 		else:
 			self.UserMessage("Invalid image scaling.")
