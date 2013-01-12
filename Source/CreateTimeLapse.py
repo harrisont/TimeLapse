@@ -40,7 +40,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.InitImagesListControl()
 		self.InitFramesRateControl()
 		self.InitImageScaleControl()
-		self.InitCreateMovieFromImagesButton()
+		self.InitCreateMovieButton()
 		self.InitStatusControl()
 
 	def InitSelectImagesButton(self):
@@ -51,14 +51,14 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			style='TButton'
 			).pack(fill=tkinter.X)
 
-	def InitCreateMovieFromImagesButton(self):
-		self.createMovieFromImagesButton = ttk.Button(
+	def InitCreateMovieButton(self):
+		self.createMovieButton = ttk.Button(
 			self,
 			text='Create Video From Images',
-			command=self.CreateMovieFromImages,
+			command=self.CreateMovie,
 			state=tkinter.DISABLED,
 			style='TButton')
-		self.createMovieFromImagesButton.pack(
+		self.createMovieButton.pack(
 			fill=tkinter.X,
 			pady=4)
 
@@ -67,7 +67,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			buttonState = tkinter.NORMAL
 		else:
 			buttonState = tkinter.DISABLED
-		self.createMovieFromImagesButton.config(state=buttonState)
+		self.createMovieButton.config(state=buttonState)
 
 	def InitImagesListControl(self):
 		# Setup a list-box and scrollbars for it.
@@ -207,7 +207,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 	def GetFramesPerSecond(self):
 		return self.framesPerSecondControl.get()
 
-	def CreateMovieFromImages(self):
+	def CreateMovie(self):
 		"""Use MEncoder to create a movie from the images.
 		Run it as a separate process and start checking to see if it is running (asynchronously).
 		"""
@@ -229,7 +229,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.resultQueue = queue.Queue()
 
 		self.mencoderProcess = threading.Thread(
-			target=self.CreateMovieFromImagesAndStoreResult,
+			target=self.CreateMovieAndStoreResult,
 			args=(
 				self.imageFileNames,
 				self.GetFramesPerSecond(),
@@ -238,8 +238,8 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		self.mencoderProcess.start()
 		self.CheckIfMencoderRunning()
 
-	def CreateMovieFromImagesAndStoreResult(self, imageFileNames, framesPerSecond, width, height):
-		"""Wraps CreateMovieFromImages and stores the result in a Queue.
+	def CreateMovieAndStoreResult(self, imageFileNames, framesPerSecond, width, height):
+		"""Wraps CreateMovie and stores the result in a Queue.
 		"""
 		result = Mencoder.CreateMovieFromImages(
 			imageFileNames,
