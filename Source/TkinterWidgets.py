@@ -335,11 +335,10 @@ class ImageScaleControl(ttk.LabelFrame):
 		self._SetHeightWithNoAspectRatioCorrection(width / self.GetAspectRatio())
 
 	def IsValid(self):
-		bothEmpty = self.widthControl.IsEmpty() and self.heightControl.IsEmpty()
-		bothFilled = not self.widthControl.IsEmpty() and not self.heightControl.IsEmpty()
-
 		return self.widthControl.entry.IsValid() \
-			and (bothEmpty or bothFilled)
+			and self.heightControl.entry.IsValid() \
+			and not self.widthControl.IsEmpty() \
+			and not self.heightControl.IsEmpty()
 
 	def Disable(self):
 		self.keepAspectRatioControl.Disable()
