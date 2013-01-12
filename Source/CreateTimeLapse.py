@@ -62,6 +62,13 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 			fill=tkinter.X,
 			pady=4)
 
+	def _SetCreateMovieButtonEnabled(self, isEnabled):
+		if isEnabled:
+			buttonState = tkinter.NORMAL
+		else:
+			buttonState = tkinter.DISABLED
+		self.createMovieFromImagesButton.config(state=buttonState)
+
 	def InitImagesListControl(self):
 		# Setup a list-box and scrollbars for it.
 		# See http://effbot.org/zone/tk-scrollbar-patterns.htm for scrollbar documentation.
@@ -174,14 +181,13 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 		if len(imageFileNames) > 0:
 			# Enable controls that are dependent on having selected images.
-			createMovieButtonState = tkinter.NORMAL
+			self._SetCreateMovieButtonEnabled(True)
 			self.imageScaleControl.Enable()
 
 			contentType, width, height = ImageHelper.GetImageInfoFromImage(imageFileNames[0])
 			self.imageScaleControl.SetWidthAndHeight(width, height)
 		else:
-			createMovieButtonState = tkinter.DISABLED
-		self.createMovieFromImagesButton.config(state=createMovieButtonState)
+			self._SetCreateMovieButtonEnabled(False)
 
 	def GetScaledResolution(self):
 		return self.imageScaleControl.GetWidthAndHeight()
