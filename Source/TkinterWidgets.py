@@ -242,6 +242,7 @@ class ImageScaleControl(ttk.LabelFrame):
 		frame = ttk.Frame(self)
 
 		self.aspectRatio = 1
+		self.validityChangedCallback = None
 
 		self.keepAspectRatioControl = CheckboxControl(
 			frame,
@@ -259,8 +260,11 @@ class ImageScaleControl(ttk.LabelFrame):
 		self.heightControl = LabelledEntryControl(
 			frame,
 			'Height',
-			entryClass=IntegerEntry)
+			entryClass=IntegerEntry,
+			entryArgs={'changedCommand': self._ChangedHeight})
 		self.heightControl.pack(fill=tk.X, padx=4, pady=1)
+
+		self.cachedIsValid = self.IsValid()
 
 		self.SetKeepAspectRatio(True)
 		# The checked-event doesn't trigger while initializing, so trigger it manually.
@@ -284,6 +288,17 @@ class ImageScaleControl(ttk.LabelFrame):
 	def _ChangedWidth(self):
 		if self.GetKeepAspectRatio():
 			self._SetHeightFromAspectRatioCorrectedWidth()
+		self._UpdateValidity()
+
+	def _ChangedHeight(self):
+		self._UpdateValidity()
+
+	def _UpdateValidity(self):
+		newIsValid = self.IsValid()
+		if newIsValid != self.cachedIsValid:
+			self.cachedIsValid = newIsValid
+			if self.validityChangedCallback:
+				self.validityChangedCallback()
 
 	def GetAspectRatio(self):
 		return self.aspectRatio
@@ -339,6 +354,9 @@ class ImageScaleControl(ttk.LabelFrame):
 			and self.heightControl.entry.IsValid() \
 			and not self.widthControl.IsEmpty() \
 			and not self.heightControl.IsEmpty()
+
+	def SetValidityChangedCallback(self, callback):
+		self.validityChangedCallback = callback
 
 	def Disable(self):
 		self.keepAspectRatioControl.Disable()

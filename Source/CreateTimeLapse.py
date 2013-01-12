@@ -126,6 +126,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 
 	def InitImageScaleControl(self):
 		self.imageScaleControl = TkinterWidgets.ImageScaleControl(self)
+		self.imageScaleControl.SetValidityChangedCallback(self._ImageScaleControlValidityChanged)
 		self.imageScaleControl.Disable()
 		self.imageScaleControl.pack(pady=(0,4))
 
@@ -198,6 +199,10 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
 		else:
 			self.UserMessage("Invalid image scaling.")
 			return False
+
+	def _ImageScaleControlValidityChanged(self):
+		isValid = self.imageScaleControl.IsValid()
+		self._SetCreateMovieButtonEnabled(isValid)
 
 	def GetFramesPerSecond(self):
 		return self.framesPerSecondControl.get()
