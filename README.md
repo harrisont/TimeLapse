@@ -10,7 +10,7 @@ Currently only Windows is supported.  Mac support is in progress.
 
 Usage
 -----
- 1. Run CreateTimeLapse.bat.
+ 1. Run CreateTimeLapse.py.
  2. Click the "Select Images" button to select the images to use.
  3. _(optional)_ Choose a frame rate.  Note that the video encoding has trouble below 10 frames-per-second.
  4. _(optional)_ Choose the video resolution.  If none is specified, the image resolution is used.
