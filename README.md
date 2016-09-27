@@ -2,6 +2,8 @@ TimeLapse
 =========
 Utility to create a time lapse movie from a series of images.
 
+![Screenshot](Screenshot.png)
+
 Platform Support
 ----------------
 Currently only Windows is supported.  Mac support is in progress.
@@ -13,7 +15,7 @@ Usage
  3. _(optional)_ Choose a frame rate.  Note that the video encoding has trouble below 10 frames-per-second.
  4. _(optional)_ Choose the video resolution.  If none is specified, the image resolution is used.
  5. Click the "Create Video From Images" button.
- 6. View the created movie in the input-image directory. 
+ 6. View the created movie in the input-image directory.
 
 Dependencies
 ------------
@@ -32,7 +34,3 @@ Create Standalone Executable
  3. Run ```CreateExecutable.py build.```.
  4. The output will be under ```./build/```.
  5. Optionally zip the output up and send to users.
-
-Author
-------
-Harrison Ting
