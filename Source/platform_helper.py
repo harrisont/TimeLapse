@@ -1,7 +1,9 @@
 import doctest
+import logging
 import sys
 
-import log
+
+logger = logging.getLogger(__name__)
 
 
 class Platforms:
@@ -15,7 +17,7 @@ def get_platform():
     elif sys.platform in ["Windows", "win32"]:
         return Platforms.windows
     else:
-        log.log(log.LogLevel.error, "Unknown platform '{}'.  Attempting to continue assuming Windows.".format(sys.platform))
+        logger.error("Unknown platform '{}'.  Attempting to continue assuming Windows.".format(sys.platform))
         return Platforms.windows
 
 if __name__ == '__main__':

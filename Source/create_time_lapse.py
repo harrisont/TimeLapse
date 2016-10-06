@@ -1,8 +1,9 @@
 # Tkinter info:
 # http://tkinter.unpythonic.net/wiki/tkFileDialog
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
-
+import argparse
 import doctest
+import logging
 import os
 import pprint
 import queue
@@ -14,12 +15,12 @@ import tkinter.filedialog
 
 import directories
 import image_helper
-import log
 import mencoder
 import platform_helper
 import tkinter_widgets
 
-log.global_log_level = log.LogLevel.verbose
+
+logger = logging.getLogger(__name__)
 
 
 class TimeLapseVideoFromImagesDialog(ttk.Frame):
@@ -142,7 +143,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
         self.status_label.config(text=text)
 
     def user_message(self, message):
-        log.log(log.LogLevel.user, message)
+        logger.info(message)
         self.set_status_label(message)
 
     def select_images(self):
@@ -155,10 +156,10 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
             filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("All Files", ".*")])
         if not files:
             return
-        log.log(log.LogLevel.verbose, "File picker returned \n{}.".format(pprint.pformat(files)))
+        logger.debug("File picker returned \n{}.".format(pprint.pformat(files)))
 
         image_file_names = self.get_image_file_names(files)
-        log.log(log.LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(image_file_names)))
+        logger.debug("Settings images to \n{}".format(pprint.pformat(image_file_names)))
 
         self.set_status_label('')
 
@@ -229,7 +230,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
         if width and height:
             resolution_str = '({}x{})'.format(width, height)
 
-        log.log(log.LogLevel.verbose, 'Creating movie: images="{}", FPS=({}), resolution={}'.format(
+        logger.debug('Creating movie: images="{}", FPS=({}), resolution={}'.format(
             self.image_file_names,
             self.get_frames_per_second(),
             resolution_str))
@@ -259,7 +260,7 @@ class TimeLapseVideoFromImagesDialog(ttk.Frame):
     def check_if_mencoder_running(self):
         self.mencoder_process.join(0)
         if self.mencoder_process.is_alive():
-            log.log(log.LogLevel.verbose, 'MEncoder is still running; rescheduling check.')
+            logger.debug('MEncoder is still running; rescheduling check.')
             self.schedule_mencoder_status_check()
         else:
             result = self.result_queue.get()
@@ -289,6 +290,13 @@ def redirect_output_to_null():
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Create time lapse movies from series of images.')
+    parser.add_argument('--log-level', choices=['error', 'warning', 'info', 'debug'], default='info')
+    args = parser.parse_args()
+
+    numeric_log_level = getattr(logging, args.log_level.upper())
+    logging.basicConfig(format='[%(name)s] %(levelname)s: %(message)s', level=numeric_log_level)
+
     if not sys.stdout:
         redirect_output_to_null()
 

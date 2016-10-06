@@ -5,12 +5,15 @@ which is in the MPlayer (http://www.mplayerhq.hu/design7/news.html) suite.
 MPlayer/MEncoder man page: http://tivo-mplayer.sourceforge.net/docs/mplayer-man.html.
 """
 import doctest
+import logging
 import os
 
 import directories
 import image_helper
-import log
 import platform_helper
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_movie_from_images(image_file_names, frames_per_second, width=None, height=None):
@@ -58,7 +61,7 @@ def _create_movie_from_images_with_image_encoding(image_file_names, frames_per_s
     if exit_status == 0:
         return os.path.realpath(movie_path)
     else:
-        log.log(log.LogLevel.error, "mencoder failed with code {}.".format(exit_status))
+        logger.error("mencoder failed with code {}.".format(exit_status))
         return
 
 
@@ -82,11 +85,11 @@ def _run_mencoder_command(mencoder_args):
         _get_mencoder_file(),
         ' '.join(mencoder_args))
 
-    log.log(log.LogLevel.verbose, command)
+    logger.debug(command)
 
     mencoder_directory = _get_mencoder_directory()
     root_directory = os.getcwd()
-    log.log(log.LogLevel.verbose, "mencoder directory = '{}'".format(mencoder_directory))
+    logger.debug("mencoder directory = '{}'".format(mencoder_directory))
 
     os.chdir(mencoder_directory)
     exit_status = os.system(command)

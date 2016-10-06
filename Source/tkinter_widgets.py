@@ -1,8 +1,10 @@
 import doctest
+import logging
 import tkinter as tk
 from tkinter import ttk
 
-import log
+
+logger = logging.getLogger(__name__)
 
 
 class Label(ttk.Label):
@@ -110,7 +112,7 @@ class IntegerEntry(Entry):
                 int(text)
             return True
         except ValueError:
-            log.log(log.LogLevel.verbose, 'Invalid text entry "{}"'.format(text))
+            logger.debug('Invalid text entry "{}"'.format(text))
             return False
 
 
