@@ -45,7 +45,7 @@ cx_Freeze.setup(
     },
     executables=[
         cx_Freeze.Executable(
-            script='Source/CreateTimeLapse.py',
+            script='Source/create_time_lapse.py',
             targetName='TimeLapse.exe',
             base=base,
             icon='Resources/radian.ico',
