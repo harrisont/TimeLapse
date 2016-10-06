@@ -78,7 +78,7 @@ def write_image_file_names(image_file_name_list_file_name, image_file_names):
 
 
 def _run_mencoder_command(mencoder_args):
-    """menocderArgs is a list of arguments to pass to MEncoder.
+    """mencoder_args is a list of arguments to pass to MEncoder.
     It should not contain the MEncoder executable.
     """
     command = '{} {}'.format(
