@@ -2,13 +2,6 @@
 # http://tkinter.unpythonic.net/wiki/tkFileDialog
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/index.html
 
-import Directories
-import ImageHelper
-import Log
-import Mencoder
-import PlatformHelper
-import TkinterWidgets
-
 import doctest
 import os
 import pprint
@@ -19,285 +12,303 @@ import tkinter
 from tkinter import ttk
 import tkinter.filedialog
 
-Log.logLevel = Log.LogLevel.verbose
+import directories
+import image_helper
+import log
+import mencoder
+import platform_helper
+import tkinter_widgets
+
+log.global_log_level = log.LogLevel.verbose
+
 
 class TimeLapseVideoFromImagesDialog(ttk.Frame):
-	def __init__(self, window):
-		ttk.Style().configure('Toplevel.TFrame', padx=5, pady=5)
-		super().__init__(
-			window,
-			style='Toplevel.TFrame')
+    def __init__(self, window):
+        ttk.Style().configure('Toplevel.TFrame', padx=5, pady=5)
+        super().__init__(
+            window,
+            style='Toplevel.TFrame')
 
-		ttk.Style().configure('TButton', padx=5, pady=5)
+        ttk.Style().configure('TButton', padx=5, pady=5)
 
-		window.wm_title("TimeLapse")
-		window.iconbitmap(default=os.path.join(Directories.GetResourcesDirectory(), 'radian.ico'))
+        window.wm_title("TimeLapse")
+        window.iconbitmap(default=os.path.join(directories.get_resources_directory(), 'radian.ico'))
 
-		self.window = window
-		self.imageFileNames = []
+        self.window = window
+        self.image_file_names = []
+        self.create_movie_button = None
+        self.images_list_control = None
+        self.frames_per_second_control = None
+        self.status_label = None
+        self.image_scale_control = None
+        self.result_queue = None
+        self.mencoder_process = None
 
-		self.InitSelectImagesButton()
-		self.InitImagesListControl()
-		self.InitFramesRateControl()
-		self.InitImageScaleControl()
-		self.InitCreateMovieButton()
-		self.InitStatusControl()
+        self.init_select_images_button()
+        self.init_images_list_control()
+        self.init_frames_rate_control()
+        self.init_image_scale_control()
+        self.init_create_movie_button()
+        self.init_status_control()
 
-	def InitSelectImagesButton(self):
-		ttk.Button(
-			self,
-			text='Select Images',
-			command=self.SelectImages,
-			style='TButton'
-			).pack(fill=tkinter.X)
+    def init_select_images_button(self):
+        ttk.Button(
+            self,
+            text='Select Images',
+            command=self.select_images,
+            style='TButton'
+            ).pack(fill=tkinter.X)
 
-	def InitCreateMovieButton(self):
-		self.createMovieButton = ttk.Button(
-			self,
-			text='Create Video From Images',
-			command=self.CreateMovie,
-			state=tkinter.DISABLED,
-			style='TButton')
-		self.createMovieButton.pack(
-			fill=tkinter.X,
-			pady=4)
+    def init_create_movie_button(self):
+        self.create_movie_button = ttk.Button(
+            self,
+            text='Create Video From Images',
+            command=self.create_movie,
+            state=tkinter.DISABLED,
+            style='TButton')
+        self.create_movie_button.pack(
+            fill=tkinter.X,
+            pady=4)
 
-	def _SetCreateMovieButtonEnabled(self, isEnabled):
-		if isEnabled:
-			buttonState = tkinter.NORMAL
-		else:
-			buttonState = tkinter.DISABLED
-		self.createMovieButton.config(state=buttonState)
+    def _set_create_movie_button_enabled(self, is_enabled):
+        if is_enabled:
+            button_state = tkinter.NORMAL
+        else:
+            button_state = tkinter.DISABLED
+        self.create_movie_button.config(state=button_state)
 
-	def InitImagesListControl(self):
-		# Setup a list-box and scrollbars for it.
-		# See http://effbot.org/zone/tk-scrollbar-patterns.htm for scrollbar documentation.
+    def init_images_list_control(self):
+        # Setup a list-box and scroll bars for it.
+        # See http://effbot.org/zone/tk-scrollbar-patterns.htm for scrollbar documentation.
 
-		frame = ttk.Frame(
-			self,
-			borderwidth=2,
-			relief=tkinter.SUNKEN)
+        frame = ttk.Frame(
+            self,
+            borderwidth=2,
+            relief=tkinter.SUNKEN)
 
-		scrollbarY = ttk.Scrollbar(frame)
-		scrollbarX = ttk.Scrollbar(frame, orient=tkinter.HORIZONTAL)
-		scrollbarY.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-		scrollbarX.pack(side=tkinter.BOTTOM, fill=tkinter.X)
+        scrollbar_y = ttk.Scrollbar(frame)
+        scrollbar_x = ttk.Scrollbar(frame, orient=tkinter.HORIZONTAL)
+        scrollbar_y.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+        scrollbar_x.pack(side=tkinter.BOTTOM, fill=tkinter.X)
 
-		self.imagesListControl = tkinter.Listbox(
-			frame,
-			borderwidth=0,
-			width=80,
-			height=6,
-			yscrollcommand=scrollbarY.set,
-			xscrollcommand=scrollbarX.set)
-		self.imagesListControl.pack(fill=tkinter.BOTH, expand=True)
+        self.images_list_control = tkinter.Listbox(
+            frame,
+            borderwidth=0,
+            width=80,
+            height=6,
+            yscrollcommand=scrollbar_y.set,
+            xscrollcommand=scrollbar_x.set)
+        self.images_list_control.pack(fill=tkinter.BOTH, expand=True)
 
-		scrollbarY.config(command=self.imagesListControl.yview)
-		scrollbarX.config(command=self.imagesListControl.xview)
+        scrollbar_y.config(command=self.images_list_control.yview)
+        scrollbar_x.config(command=self.images_list_control.xview)
 
-		frame.pack(
-			fill=tkinter.BOTH,
-			expand=True,
-			pady=(0,4))
+        frame.pack(
+            fill=tkinter.BOTH,
+            expand=True,
+            pady=(0, 4))
 
-	def InitFramesRateControl(self):
-		frame = ttk.Frame(self)
+    def init_frames_rate_control(self):
+        frame = ttk.Frame(self)
 
-		ttk.Label(
-			frame,
-			text="Frames per second:").pack(side=tkinter.LEFT)
+        ttk.Label(
+            frame,
+            text="Frames per second:").pack(side=tkinter.LEFT)
 
-		frameRateVar = tkinter.StringVar()
-		frameRateVar.set(24)
-		self.framesPerSecondControl = tkinter.Spinbox(
-			frame,
-			from_=10,
-			to=60,
-			increment=2,
-			textvariable=frameRateVar,
-			width=4)
-		self.framesPerSecondControl.pack()
+        frame_rate_var = tkinter.StringVar()
+        frame_rate_var.set(24)
+        self.frames_per_second_control = tkinter.Spinbox(
+            frame,
+            from_=10,
+            to=60,
+            increment=2,
+            textvariable=frame_rate_var,
+            width=4)
+        self.frames_per_second_control.pack()
 
-		frame.pack(pady=4)
+        frame.pack(pady=4)
 
-	def InitStatusControl(self):
-		self.statusLabel = ttk.Label(self)
-		self.statusLabel.pack()
+    def init_status_control(self):
+        self.status_label = ttk.Label(self)
+        self.status_label.pack()
 
-	def InitImageScaleControl(self):
-		self.imageScaleControl = TkinterWidgets.ImageScaleControl(self)
-		self.imageScaleControl.SetValidityChangedCallback(self._ImageScaleControlValidityChanged)
-		self.imageScaleControl.Disable()
-		self.imageScaleControl.pack(pady=(0,4))
+    def init_image_scale_control(self):
+        self.image_scale_control = tkinter_widgets.ImageScaleControl(self)
+        self.image_scale_control.set_validity_changed_callback(self._image_scale_control_validity_changed)
+        self.image_scale_control.disable()
+        self.image_scale_control.pack(pady=(0, 4))
 
-	def SetStatusLabel(self, text):
-		self.statusLabel.config(text=text)
+    def set_status_label(self, text):
+        self.status_label.config(text=text)
 
-	def UserMessage(self, message):
-		Log.Log(Log.LogLevel.user, message)
-		self.SetStatusLabel(message)
+    def user_message(self, message):
+        log.log(log.LogLevel.user, message)
+        self.set_status_label(message)
 
-	def SelectImages(self):
-		"""Bring up a dialog to allow the user to select one or more images.
-		Return a list of the selected image file names.
-		"""
-		files = tkinter.filedialog.askopenfilenames(
-			parent=self.window,
-			title="Select Images",
-			filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("All Files", ".*")])
-		if not files:
-			return
-		Log.Log(Log.LogLevel.verbose, "File picker returned \n{}.".format(pprint.pformat(files)))
+    def select_images(self):
+        """Bring up a dialog to allow the user to select one or more images.
+        Return a list of the selected image file names.
+        """
+        files = tkinter.filedialog.askopenfilenames(
+            parent=self.window,
+            title="Select Images",
+            filetypes=[("Image", ".jpg"), ("Image", ".jpeg"), ("Image", ".png"), ("All Files", ".*")])
+        if not files:
+            return
+        log.log(log.LogLevel.verbose, "File picker returned \n{}.".format(pprint.pformat(files)))
 
-		imageFileNames = self.GetImageFileNames(files)
-		Log.Log(Log.LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(imageFileNames)))
+        image_file_names = self.get_image_file_names(files)
+        log.log(log.LogLevel.verbose, "Settings images to \n{}".format(pprint.pformat(image_file_names)))
 
-		self.SetStatusLabel('')
+        self.set_status_label('')
 
-		encoding, errorMessage = ImageHelper.GetImageEncodingFromFileNames(imageFileNames)
-		if encoding == ImageHelper.ImageEncoding.unknown:
-			self.UserMessage(errorMessage)
-			imageFileNames = []
+        encoding, error_message = image_helper.get_image_encoding_from_file_names(image_file_names)
+        if encoding == image_helper.ImageEncoding.unknown:
+            self.user_message(error_message)
+            image_file_names = []
 
-		self.SetImages(imageFileNames)
+        self.set_images(image_file_names)
 
-	def GetImageFileNames(self, files):
-		"""The file picker returns different types on different platforms.
-		This handles each one.
-		"""
-		platform = PlatformHelper.GetPlatform()
-		if platform == PlatformHelper.Platforms.windows:
-			# Windows returns a single string for the file list.
-			return self.window.tk.splitlist(files)
-		else:
-			# Mac returns a tuple of files.
-			# Also use this in the default case.
-			return files
+    def get_image_file_names(self, files):
+        """The file picker returns different types on different platforms.
+        This handles each one.
+        """
+        platform = platform_helper.get_platform()
+        if platform == platform_helper.Platforms.windows:
+            # Windows returns a single string for the file list.
+            return self.window.tk.splitlist(files)
+        else:
+            # Mac returns a tuple of files.
+            # Also use this in the default case.
+            return files
 
-	def SetImages(self, imageFileNames):
-		self.imageFileNames = imageFileNames
+    def set_images(self, image_file_names):
+        self.image_file_names = image_file_names
 
-		self.imagesListControl.delete(0, tkinter.END)
-		self.imagesListControl.insert(0, *imageFileNames)
+        self.images_list_control.delete(0, tkinter.END)
+        self.images_list_control.insert(0, *image_file_names)
 
-		if len(imageFileNames) > 0:
-			# Enable controls that are dependent on having selected images.
-			self._SetCreateMovieButtonEnabled(True)
-			self.imageScaleControl.Enable()
+        if len(image_file_names) > 0:
+            # Enable controls that are dependent on having selected images.
+            self._set_create_movie_button_enabled(True)
+            self.image_scale_control.enable()
 
-			contentType, width, height = ImageHelper.GetImageInfoFromImage(imageFileNames[0])
-			self.imageScaleControl.SetWidthAndHeight(width, height)
-		else:
-			self._SetCreateMovieButtonEnabled(False)
+            content_type, width, height = image_helper.get_image_info_from_image(image_file_names[0])
+            self.image_scale_control.set_width_and_height(width, height)
+        else:
+            self._set_create_movie_button_enabled(False)
 
-	def GetScaledResolution(self):
-		return self.imageScaleControl.GetWidthAndHeight()
+    def get_scaled_resolution(self):
+        return self.image_scale_control.get_width_and_height()
 
-	def ValidateScaledResolution(self):
-		if self.imageScaleControl.IsValid():
-			return True
-		else:
-			self.UserMessage("Invalid image scaling.")
-			return False
+    def validate_scaled_resolution(self):
+        if self.image_scale_control.is_valid():
+            return True
+        else:
+            self.user_message("Invalid image scaling.")
+            return False
 
-	def _ImageScaleControlValidityChanged(self):
-		isValid = self.imageScaleControl.IsValid()
-		self._SetCreateMovieButtonEnabled(isValid)
+    def _image_scale_control_validity_changed(self):
+        is_valid = self.image_scale_control.is_valid()
+        self._set_create_movie_button_enabled(is_valid)
 
-	def GetFramesPerSecond(self):
-		return self.framesPerSecondControl.get()
+    def get_frames_per_second(self):
+        return self.frames_per_second_control.get()
 
-	def CreateMovie(self):
-		"""Use MEncoder to create a movie from the images.
-		Run it as a separate process and start checking to see if it is running (asynchronously).
-		"""
-		if not self.ValidateScaledResolution():
-			return
-		width, height = self.GetScaledResolution()
+    def create_movie(self):
+        """Use MEncoder to create a movie from the images.
+        Run it as a separate process and start checking to see if it is running (asynchronously).
+        """
+        if not self.validate_scaled_resolution():
+            return
+        width, height = self.get_scaled_resolution()
 
-		self.UserMessage("Creating movie...")
+        self.user_message("Creating movie...")
 
-		resolutionStr = '<image-size>'
-		if width and height:
-			resolutionStr = '({}x{})'.format(width, height)
+        resolution_str = '<image-size>'
+        if width and height:
+            resolution_str = '({}x{})'.format(width, height)
 
-		Log.Log(Log.LogLevel.verbose, 'Creating movie: images="{}", FPS=({}), resolution={}'.format(
-			self.imageFileNames,
-			self.GetFramesPerSecond(),
-			resolutionStr))
+        log.log(log.LogLevel.verbose, 'Creating movie: images="{}", FPS=({}), resolution={}'.format(
+            self.image_file_names,
+            self.get_frames_per_second(),
+            resolution_str))
 
-		self.resultQueue = queue.Queue()
+        self.result_queue = queue.Queue()
 
-		self.mencoderProcess = threading.Thread(
-			target=self.CreateMovieAndStoreResult,
-			args=(
-				self.imageFileNames,
-				self.GetFramesPerSecond(),
-				width,
-				height))
-		self.mencoderProcess.start()
-		self.CheckIfMencoderRunning()
+        self.mencoder_process = threading.Thread(
+            target=self.create_movie_and_store_result,
+            args=(
+                self.image_file_names,
+                self.get_frames_per_second(),
+                width,
+                height))
+        self.mencoder_process.start()
+        self.check_if_mencoder_running()
 
-	def CreateMovieAndStoreResult(self, imageFileNames, framesPerSecond, width, height):
-		"""Wraps CreateMovie and stores the result in a Queue.
-		"""
-		result = Mencoder.CreateMovieFromImages(
-			imageFileNames,
-			framesPerSecond,
-			width,
-			height)
-		self.resultQueue.put(result)
+    def create_movie_and_store_result(self, image_file_names, frames_per_second, width, height):
+        """Wraps CreateMovie and stores the result in a Queue.
+        """
+        result = mencoder.create_movie_from_images(
+            image_file_names,
+            frames_per_second,
+            width,
+            height)
+        self.result_queue.put(result)
 
-	def CheckIfMencoderRunning(self):
-		self.mencoderProcess.join(0)
-		if self.mencoderProcess.is_alive():
-			Log.Log(Log.LogLevel.verbose, 'MEncoder is still running; rescheduling check.')
-			self.ScheduleMencoderStatusCheck()
-		else:
-			result = self.resultQueue.get()
-			self.MencoderFinished(result)
+    def check_if_mencoder_running(self):
+        self.mencoder_process.join(0)
+        if self.mencoder_process.is_alive():
+            log.log(log.LogLevel.verbose, 'MEncoder is still running; rescheduling check.')
+            self.schedule_mencoder_status_check()
+        else:
+            result = self.result_queue.get()
+            self.mencoder_finished(result)
 
-	def ScheduleMencoderStatusCheck(self):
-		mencoderIsRunningIntervalMilliseconds = 100
-		self.after(mencoderIsRunningIntervalMilliseconds, self.CheckIfMencoderRunning)
+    def schedule_mencoder_status_check(self):
+        mencoder_is_running_interval_milliseconds = 100
+        self.after(mencoder_is_running_interval_milliseconds, self.check_if_mencoder_running)
 
-	def MencoderFinished(self, result):
-		if result:
-			moviePath = result
-			self.UserMessage("Created movie: {}".format(moviePath))
-		else:
-			self.UserMessage("Error in creating movie.")
+    def mencoder_finished(self, result):
+        if result:
+            movie_path = result
+            self.user_message("Created movie: {}".format(movie_path))
+        else:
+            self.user_message("Error in creating movie.")
 
-def RunDocTests():
-	numFailures, numTests = doctest.testmod()
-	return numFailures == 0
 
-def RedirectOutputToNull():
-	null = open(os.devnull, 'w')
-	sys.stdout = null
-	sys.stderr = null
+def run_doc_tests():
+    num_failures, num_tests = doctest.testmod()
+    return num_failures == 0
+
+
+def redirect_output_to_null():
+    null = open(os.devnull, 'w')
+    sys.stdout = null
+    sys.stderr = null
+
 
 def main():
-	if not sys.stdout:
-		RedirectOutputToNull()
+    if not sys.stdout:
+        redirect_output_to_null()
 
-	if not RunDocTests():
-		return
+    if not run_doc_tests():
+        return
 
-	window = tkinter.Tk()
-	TimeLapseVideoFromImagesDialog(window).pack(
-		fill=tkinter.BOTH,
-		expand=True,
-		padx=2,
-		pady=2)
+    window = tkinter.Tk()
+    TimeLapseVideoFromImagesDialog(window).pack(
+        fill=tkinter.BOTH,
+        expand=True,
+        padx=2,
+        pady=2)
 
-	# Update the window so that it calculates the size,
-	# then use it to set the minimum size to prevent distortions
-	# when users resize the window very small.
-	window.update()
-	window.minsize(window.winfo_width(), window.winfo_height())
+    # Update the window so that it calculates the size,
+    # then use it to set the minimum size to prevent distortions
+    # when users resize the window very small.
+    window.update()
+    window.minsize(window.winfo_width(), window.winfo_height())
 
-	window.mainloop()
+    window.mainloop()
 
-if __name__=='__main__':
-	main()
+if __name__ == '__main__':
+    main()
