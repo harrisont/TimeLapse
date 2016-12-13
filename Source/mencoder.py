@@ -7,6 +7,7 @@ MPlayer/MEncoder man page: http://tivo-mplayer.sourceforge.net/docs/mplayer-man.
 import doctest
 import logging
 import os
+import subprocess
 
 import directories
 import image_helper
@@ -38,22 +39,23 @@ def _create_movie_from_images_with_image_encoding(image_file_names, frames_per_s
     file_name_list_file_name = os.path.join(input_directory, 'FileNames.txt')
     write_image_file_names(file_name_list_file_name, image_file_names)
 
-    scale_option = ''
+    scale_option = []
     if width and height:
-        scale_option = '-vf scale={}:{}'.format(width, height)
+        scale_option = ['-vf', 'scale={}:{}'.format(width, height)]
     elif width or height:
         raise ValueError('To scale the images, you must specify both the width and the height.')
 
     mencoder_args = [
-        '"mf://@{}"'.format(file_name_list_file_name),
-        '-mf type={}:fps={}'.format(image_encoding_str, frames_per_second),
-        scale_option,
+        'mf://@{}'.format(file_name_list_file_name),
+        '-mf',
+        'type={}:fps={}'.format(image_encoding_str, frames_per_second),
+        *scale_option,
         '-ovc',
         'lavc',
         '-lavcopts',
         'vcodec=mpeg4:mbd=2:trell',
         '-o',
-        '"{}"'.format(movie_path)
+        '{}'.format(movie_path)
         ]
 
     exit_status = _run_mencoder_command(mencoder_args)
@@ -81,21 +83,14 @@ def _run_mencoder_command(mencoder_args):
     """mencoder_args is a list of arguments to pass to MEncoder.
     It should not contain the MEncoder executable.
     """
-    command = '{} {}'.format(
-        _get_mencoder_file(),
-        ' '.join(mencoder_args))
-
-    logger.debug(command)
-
     mencoder_directory = _get_mencoder_directory()
-    root_directory = os.getcwd()
-    logger.debug("mencoder directory = '{}'".format(mencoder_directory))
+    command = [_get_mencoder_path()] + mencoder_args
+    logger.debug(command)
+    logger.debug(' '.join(command))
 
-    os.chdir(mencoder_directory)
-    exit_status = os.system(command)
-    os.chdir(root_directory)
-
-    return exit_status
+    run_result = subprocess.run(command, cwd=mencoder_directory, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
+    logger.info(run_result.stdout)
+    return run_result.returncode
 
 
 def _get_mplayer_directory():
